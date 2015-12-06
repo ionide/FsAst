@@ -1,0 +1,10 @@
+*.suo
+bin/
+obj/
+/packages/
+paket.exe
+AssemblyInfo.fs
+*.sln.ide
+*.sdf
+.fake/
+.vs/

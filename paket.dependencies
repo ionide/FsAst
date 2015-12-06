@@ -1,0 +1,4 @@
+source https://www.nuget.org/api/v2
+
+nuget FSharp.Compiler.Service 2.0.0-beta
+nuget Fantomas prerelease
