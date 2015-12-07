@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module ConsoleApp.CreateAst
+module FsAst.CreateAst
 
 open Fantomas
 open Microsoft.FSharp.Compiler.Ast
@@ -14,10 +14,10 @@ let createAst() =
             Kind = SynBindingKind.NormalBinding
             IsInline = false
             IsMutable = false
-            Attribs = SynAttributes.Empty
+            Attributes = SynAttributes.Empty
             XmlDoc = PreXmlDoc.Empty
             ValData = SynValData(Some memberFlags, SynValInfo([], SynArgInfo(SynAttributes.Empty, false, None)), None)
-            Pat = SynPat.LongIdent(LongIdentWithDots([mkId "x"; mkId "Points"], [range.Zero]), None, None, SynConstructorArgs.Pats[], None, range.Zero)
+            Pattern = SynPat.LongIdent(LongIdentWithDots([mkId "x"; mkId "Points"], [range.Zero]), None, None, SynConstructorArgs.Pats[], None, range.Zero)
             ReturnInfo = None
             Expr = SynExpr.Const(SynConst.Int32 3, range.Zero)
             Range = range.Zero
@@ -26,8 +26,8 @@ let createAst() =
 
     // create Type
     let ti : SynComponentInfoRcd = 
-        {   Attribs = SynAttributes.Empty
-            TyParams = []
+        {   Attributes = SynAttributes.Empty
+            Parameters = []
             Constraints = []
             Id = [mkId "Triangle"]
             XmlDoc = PreXmlDoc.Empty
@@ -60,9 +60,9 @@ let createAst() =
     let m : SynModuleOrNamespaceRcd = 
         {   Id = [mkId "Hello"]
             IsModule = true
-            Decls = [SynModuleDecl.Types([t.FromRcd], range.Zero)]
+            Modules = [SynModuleDecl.Types([t.FromRcd], range.Zero)]
             XmlDoc = PreXmlDoc.Empty
-            Attribs = SynAttributes.Empty
+            Attributes = SynAttributes.Empty
             Access = None
             Range = range.Zero
         }
