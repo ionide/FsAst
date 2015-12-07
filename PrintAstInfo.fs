@@ -6,9 +6,9 @@ open Fantomas
 open Microsoft.FSharp.Compiler.Ast
 
 let printAstInfo() =
-    let s = File.ReadAllText @"..\..\Hello.fs"
-    let isFsi = false
-    let ast = CodeFormatter.parse isFsi s
+    let filename =  @"..\..\Hello.fs"
+    let s = File.ReadAllText filename
+    let ast = CodeFormatter.Parse(filename, s)
     match ast with
     | ParsedInput.ImplFile f ->
         let fr = f.ToRcd
@@ -26,7 +26,13 @@ let printAstInfo() =
                 match br.Pat with
                 | SynPat.LongIdent(id,_,_,_,_,_) ->
                     printfn "member: %s %s" id.Lid.[0].idText id.Lid.[1].idText
+                | _ -> ()
                 match br.Expr with
                 | SynExpr.Const(c,_) ->
                     match c with
                     | SynConst.Int32 i -> printfn "member value: %d" i
+                    | _ -> ()
+                | _ -> ()
+            | _ -> ()
+        | _ -> ()
+    | _ -> ()
