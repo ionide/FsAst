@@ -7,12 +7,12 @@ let main argv =
 //        @"..\..\Hello.fs"
         @"..\..\Enum.fs"
 
-    printfn "### printAstInfo\n"
-    PrintAstInfo.printAstInfo filename
+//    printfn "### printAstInfo\n"
+//    PrintAstInfo.printAstInfo filename
 
 //    printfn "\n### formatFs:\n"
 //    FormatFs.formatFs()
-//
-//    printfn "\n### createAst:\n"
-//    CreateAst.createAst()
+
+    printfn "\n### createBasicClass:\n"
+    CreateAst.createBasicClass()
     0

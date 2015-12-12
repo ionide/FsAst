@@ -28,7 +28,7 @@ type ParsedImplFileInputRcd with
 type SynModuleOrNamespaceRcd = {
     Id: LongIdent 
     IsModule: bool
-    Modules: SynModuleDecls
+    Declarations: SynModuleDecls
     XmlDoc: PreXmlDoc
     Attributes: SynAttributes
     Access: SynAccess option
@@ -37,12 +37,12 @@ type SynModuleOrNamespaceRcd = {
 type SynModuleOrNamespace with
     member x.ToRcd
         with get() =
-            let (SynModuleOrNamespace(id, isModule, modules, xmlDoc, attributes, access, range)) = x
-            { Id = id; IsModule = isModule; Modules = modules; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
+            let (SynModuleOrNamespace(id, isModule, declarations, xmlDoc, attributes, access, range)) = x
+            { Id = id; IsModule = isModule; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
 
 type SynModuleOrNamespaceRcd with
     member x.FromRcd
-        with get() = SynModuleOrNamespace(x.Id, x.IsModule, x.Modules, x.XmlDoc, x.Attributes, x.Access, x.Range)
+        with get() = SynModuleOrNamespace(x.Id, x.IsModule, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
 
 type SynTypeDefnRcd = {
     Info: SynComponentInfo
@@ -136,9 +136,6 @@ type SynBinding with
 type SynBindingRcd  with
     member x.FromRcd
         with get() = Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern, x.ReturnInfo, x.Expr, x.Range, x.Bind)
-
-let mkId name = Ident(name, range.Zero)
-let mkQualifiedNameOfFile name = QualifiedNameOfFile(mkId name)
 
 type SynTypeDefnSimpleReprUnionRcd = {
     Access: SynAccess option

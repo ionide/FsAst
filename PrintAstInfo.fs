@@ -13,7 +13,7 @@ let printAstInfo filename =
         let fr = f.ToRcd
         let m = fr.Modules.Head.ToRcd
         printfn "module: %s" m.Id.Head.idText
-        match m.Modules.Head with
+        match m.Declarations.Head with
         | SynModuleDecl.Types(types, _) ->
             let t = types.Head.ToRcd
             let info = t.Info.ToRcd
