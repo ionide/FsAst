@@ -43,6 +43,7 @@ let printAstInfo filename =
                     for c in enm.Cases do
                         let cr = c.ToRcd
                         printfn "  case: %s: %A" cr.Id.idText cr.Constant
+                        printfn "    attributes: %A" cr.Attributes
                 | _ -> ()
                 
         | _ -> ()

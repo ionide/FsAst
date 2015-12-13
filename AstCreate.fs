@@ -89,9 +89,15 @@ type SynTypeDefnReprObjectModelRcd with
         }
 
 type SynTypeDefnRcd with
-    static member Create (info:SynComponentInfoRcd, members) =
+    static member Create (info: SynComponentInfoRcd, members) =
         {   Info = info.FromRcd
             Repr = SynTypeDefnReprObjectModelRcd.Create(members).FromRcd
+            Members = []
+            Range = range.Zero
+        }
+    static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr) =
+        {   Info = info.FromRcd
+            Repr =  SynTypeDefnRepr.Simple(simple, range.Zero)
             Members = []
             Range = range.Zero
         }
@@ -99,6 +105,8 @@ type SynTypeDefnRcd with
 type SynModuleDecl with
     static member CreateType (info, members) =
         SynModuleDecl.Types([SynTypeDefnRcd.Create(info,members).FromRcd], range.Zero)
+    static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd) =
+        SynModuleDecl.Types([SynTypeDefnRcd.CreateSimple(info, simple.FromRcd).FromRcd], range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =
@@ -141,3 +149,36 @@ type ParsedImplFileInputRcd with
 type ParsedInput with
     static member CreateImplFile (implFile: ParsedImplFileInputRcd) =
         ParsedInput.ImplFile implFile.FromRcd
+
+type SynTypeDefnSimpleReprUnionRcd with
+    static member Create cases = // TODO SynUnionCaseRcd list
+        { Access = None; Cases = cases; Range = range.Zero }
+
+type SynTypeDefnSimpleReprEnumRcd with
+    static member Create (cases: SynEnumCaseRcd list) =
+        { Cases = (cases |> List.map (fun c -> c.FromRcd)); Range = range.Zero }
+
+type SynTypeDefnSimpleReprRecordRcd with
+    static member Create fields = // TODO SynFieldRcd list
+        { Access = None; Fields = fields; Range = range.Zero }
+
+//type SynUnionCase with // TODO
+
+type SynEnumCaseRcd with
+    static member Create (id, cnst) =
+        {   Attributes = SynAttributes.Empty
+            Id = id
+            Constant = cnst
+            XmlDoc = PreXmlDoc.Empty
+            Range = range.Zero
+        }
+
+type PreXmlDoc with
+    static member Create lines =
+        let dc = XmlDocCollector()
+        let mutable i = 0
+        for line in lines do
+            let p = mkPos i 0
+            dc.AddXmlDocLine(line, p)
+            i <- i + 1
+        PreXmlDoc.CreateFromGrabPoint(dc, mkPos i 0)

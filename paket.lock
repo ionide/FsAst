@@ -3,4 +3,4 @@ NUGET
   specs:
     Fantomas (2.0.2)
       FSharp.Compiler.Service (>= 1.4.0.6)
-    FSharp.Compiler.Service (2.0.0-beta)
+    FSharp.Compiler.Service (1.4.2.2)

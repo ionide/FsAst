@@ -3,16 +3,17 @@
 [<EntryPoint>]
 let main argv =
     
-    let filename =
+    let fs =
 //        @"..\..\Hello.fs"
         @"..\..\Enum.fs"
 
-//    printfn "### printAstInfo\n"
-//    PrintAstInfo.printAstInfo filename
+    printfn "### printAstInfo\n"
+    PrintAstInfo.printAstInfo fs
 
-//    printfn "\n### formatFs:\n"
-//    FormatFs.formatFs()
+    printfn "\n### formatFs:\n"
+    FormatFs.formatFs fs
 
-    printfn "\n### createBasicClass:\n"
-    CreateAst.createBasicClass()
+    printfn "\n### create AST:\n"
+//    CreateAst.createBasicClass()
+    CreateAst.createBasicEnums()
     0

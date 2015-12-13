@@ -14,16 +14,14 @@ type ParsedImplFileInputRcd = {
     HashDirectives: ParsedHashDirective list
     Modules: SynModuleOrNamespace list
     IsLastCompiland: bool }
+with
+    member x.FromRcd =
+        ParsedImplFileInput(x.File, x.IsScript, x.QualName, x.Pragmas, x.HashDirectives, x.Modules, x.IsLastCompiland)
 
 type ParsedImplFileInput with
-    member x.ToRcd
-        with get() =
-            let (ParsedImplFileInput(file, isScript, qualName, pragmas, hashDirectives, modules, isLastCompiland)) = x
-            { File = file; IsScript = isScript; QualName = qualName; Pragmas = pragmas; HashDirectives = hashDirectives; Modules = modules; IsLastCompiland = isLastCompiland }
-
-type ParsedImplFileInputRcd with
-    member x.FromRcd
-        with get() = ParsedImplFileInput(x.File, x.IsScript, x.QualName, x.Pragmas, x.HashDirectives, x.Modules, x.IsLastCompiland)
+    member x.ToRcd =
+        let (ParsedImplFileInput(file, isScript, qualName, pragmas, hashDirectives, modules, isLastCompiland)) = x
+        { File = file; IsScript = isScript; QualName = qualName; Pragmas = pragmas; HashDirectives = hashDirectives; Modules = modules; IsLastCompiland = isLastCompiland }
 
 type SynModuleOrNamespaceRcd = {
     Id: LongIdent 
@@ -33,32 +31,28 @@ type SynModuleOrNamespaceRcd = {
     Attributes: SynAttributes
     Access: SynAccess option
     Range: range }
+with
+    member x.FromRcd =
+        SynModuleOrNamespace(x.Id, x.IsModule, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
 
 type SynModuleOrNamespace with
-    member x.ToRcd
-        with get() =
-            let (SynModuleOrNamespace(id, isModule, declarations, xmlDoc, attributes, access, range)) = x
-            { Id = id; IsModule = isModule; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
-
-type SynModuleOrNamespaceRcd with
-    member x.FromRcd
-        with get() = SynModuleOrNamespace(x.Id, x.IsModule, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
+    member x.ToRcd =
+        let (SynModuleOrNamespace(id, isModule, declarations, xmlDoc, attributes, access, range)) = x
+        { Id = id; IsModule = isModule; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
 
 type SynTypeDefnRcd = {
     Info: SynComponentInfo
     Repr: SynTypeDefnRepr
     Members: SynMemberDefns
     Range: range }
+with
+    member x.FromRcd =
+        TypeDefn(x.Info, x.Repr, x.Members, x.Range)
 
 type SynTypeDefn with
-    member x.ToRcd
-        with get() =
-            let (TypeDefn(info, repr, members, range)) = x
-            { Info = info; Repr = repr; Members = members; Range = range }
-
-type SynTypeDefnRcd with
-    member x.FromRcd
-        with get() = TypeDefn(x.Info, x.Repr, x.Members, x.Range)
+    member x.ToRcd =
+        let (TypeDefn(info, repr, members, range)) = x
+        { Info = info; Repr = repr; Members = members; Range = range }
 
 type SynComponentInfoRcd = {
     Attributes: SynAttributes
@@ -69,16 +63,14 @@ type SynComponentInfoRcd = {
     PreferPostfix: bool
     Access: SynAccess option
     Range: range }
+with
+    member x.FromRcd =
+        ComponentInfo(x.Attributes, x.Parameters, x.Constraints, x.Id, x.XmlDoc, x.PreferPostfix, x.Access, x.Range)
 
 type SynComponentInfo with
-    member x.ToRcd
-        with get() =
-            let (ComponentInfo(attributes, parameters, constraints, id, xmldoc, preferPostfix, access, range)) = x
-            { Attributes = attributes; Parameters = parameters; Constraints = constraints; Id = id; XmlDoc = xmldoc; PreferPostfix = preferPostfix; Access = access; Range = range }
-
-type SynComponentInfoRcd with
-    member x.FromRcd
-        with get() = ComponentInfo(x.Attributes, x.Parameters, x.Constraints, x.Id, x.XmlDoc, x.PreferPostfix, x.Access, x.Range)
+    member x.ToRcd =
+        let (ComponentInfo(attributes, parameters, constraints, id, xmldoc, preferPostfix, access, range)) = x
+        { Attributes = attributes; Parameters = parameters; Constraints = constraints; Id = id; XmlDoc = xmldoc; PreferPostfix = preferPostfix; Access = access; Range = range }
 
 type SynTypeDefnReprObjectModelRcd = {
     Kind: SynTypeDefnKind
@@ -93,25 +85,29 @@ type SynTypeDefnReprSimpleRcd = {
 type SynTypeDefnReprRcd =
     | ObjectModel of SynTypeDefnReprObjectModelRcd
     | Simple of SynTypeDefnReprSimpleRcd
+with 
+    member x.FromRcd =
+        match x with
+        | ObjectModel om -> SynTypeDefnRepr.ObjectModel(om.Kind, om.Members, om.Range)
+        | Simple s -> SynTypeDefnRepr.Simple(s.Repr, s.Range)
 
 type SynTypeDefnRepr with
-    member x.ToRcd
-        with get() =
-            match x with
-            | ObjectModel(kind, members, range) ->
-                { Kind = kind; Members = members; Range = range }
-                |> SynTypeDefnReprRcd.ObjectModel
-            | Simple(repr, range) ->
-                { Repr = repr; Range = range }
-                |> SynTypeDefnReprRcd.Simple
+    member x.ToRcd =
+        match x with
+        | ObjectModel(kind, members, range) ->
+            { Kind = kind; Members = members; Range = range }
+            |> SynTypeDefnReprRcd.ObjectModel
+        | Simple(repr, range) ->
+            { Repr = repr; Range = range }
+            |> SynTypeDefnReprRcd.Simple
 
 type SynTypeDefnReprObjectModelRcd with
-    member x.FromRcd
-        with get() = ObjectModel(x.Kind, x.Members, x.Range)
+    member x.FromRcd =
+        ObjectModel(x.Kind, x.Members, x.Range)
 
 type SynTypeDefnReprSimpleRcd with
-    member x.FromRcd
-        with get() = Simple(x.Repr, x.Range)
+    member x.FromRcd = 
+        Simple(x.Repr, x.Range)
 
 type SynBindingRcd = {
     Access: SynAccess option
@@ -128,14 +124,13 @@ type SynBindingRcd = {
     Bind: SequencePointInfoForBinding }
 
 type SynBinding with
-    member x.ToRcd
-        with get() =
-            let (Binding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
-            { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern; ReturnInfo = returnInfo; Expr = rhsExpr; Range = mBind; Bind = spBind }
+    member x.ToRcd =
+        let (Binding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
+        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern; ReturnInfo = returnInfo; Expr = rhsExpr; Range = mBind; Bind = spBind }
 
 type SynBindingRcd  with
-    member x.FromRcd
-        with get() = Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern, x.ReturnInfo, x.Expr, x.Range, x.Bind)
+    member x.FromRcd =
+        Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern, x.ReturnInfo, x.Expr, x.Range, x.Bind)
 
 type SynTypeDefnSimpleReprUnionRcd = {
     Access: SynAccess option
@@ -183,32 +178,42 @@ type SynTypeDefnSimpleReprRcd =
     | LibraryOnlyILAssembly of SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd
     | TypeAbbrev of SynTypeDefnSimpleReprTypeAbbrevRcd
     | None of SynTypeDefnSimpleReprNoneRcd
+with 
+    member x.FromRcd =
+        match x with
+        | Union u -> SynTypeDefnSimpleRepr.Union(u.Access, u.Cases, u.Range)
+        | Enum e -> SynTypeDefnSimpleRepr.Enum(e.Cases, e.Range)
+        | Record r -> SynTypeDefnSimpleRepr.Record(r.Access, r.Fields, r.Range)
+        | General g -> SynTypeDefnSimpleRepr.General(g.Kind, [], [], [], false, false, Option.None, g.Range) // TODO
+        | LibraryOnlyILAssembly a -> SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(a.ILType, a.Range)
+        | TypeAbbrev a -> SynTypeDefnSimpleRepr.TypeAbbrev(a.ParseDetail, a.Type, a.Range)
+        | None n -> SynTypeDefnSimpleRepr.None(n.Range)
+
 
 type SynTypeDefnSimpleRepr with
-    member x.ToRcd
-        with get() =
-            match x with
-            | SynTypeDefnSimpleRepr.Union(access, cases, range) ->
-                { Access = access; Cases =  cases; Range = range }
-                |> SynTypeDefnSimpleReprRcd.Union
-            | SynTypeDefnSimpleRepr.Enum(cases, range) ->
-                { Cases = cases; Range = range }
-                |> SynTypeDefnSimpleReprRcd.Enum
-            | SynTypeDefnSimpleRepr.Record(access, fields, range) ->
-                { Access = access; Fields = fields; Range = range }
-                |> SynTypeDefnSimpleReprRcd.Record
-            | SynTypeDefnSimpleRepr.General(kind, _, _, _, _ , _, _, range) ->
-                { Kind = kind; Range = range }
-                |> SynTypeDefnSimpleReprRcd.General
-            | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(iltype, range) ->
-                { ILType = iltype; Range = range }
-                |> SynTypeDefnSimpleReprRcd.LibraryOnlyILAssembly
-            | SynTypeDefnSimpleRepr.TypeAbbrev(parseDetail, typ, range) ->
-                { ParseDetail = parseDetail; Type = typ; Range = range }
-                |> SynTypeDefnSimpleReprRcd.TypeAbbrev
-            | SynTypeDefnSimpleRepr.None(range) ->
-                { Range = range }
-                |> SynTypeDefnSimpleReprRcd.None
+    member x.ToRcd =
+        match x with
+        | SynTypeDefnSimpleRepr.Union(access, cases, range) ->
+            { Access = access; Cases =  cases; Range = range }
+            |> SynTypeDefnSimpleReprRcd.Union
+        | SynTypeDefnSimpleRepr.Enum(cases, range) ->
+            { Cases = cases; Range = range }
+            |> SynTypeDefnSimpleReprRcd.Enum
+        | SynTypeDefnSimpleRepr.Record(access, fields, range) ->
+            { Access = access; Fields = fields; Range = range }
+            |> SynTypeDefnSimpleReprRcd.Record
+        | SynTypeDefnSimpleRepr.General(kind, _, _, _, _ , _, _, range) -> // TODO
+            { Kind = kind; Range = range }
+            |> SynTypeDefnSimpleReprRcd.General
+        | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(iltype, range) ->
+            { ILType = iltype; Range = range }
+            |> SynTypeDefnSimpleReprRcd.LibraryOnlyILAssembly
+        | SynTypeDefnSimpleRepr.TypeAbbrev(parseDetail, typ, range) ->
+            { ParseDetail = parseDetail; Type = typ; Range = range }
+            |> SynTypeDefnSimpleReprRcd.TypeAbbrev
+        | SynTypeDefnSimpleRepr.None(range) ->
+            { Range = range }
+            |> SynTypeDefnSimpleReprRcd.None
 
 type SynEnumCaseRcd = {
     Attributes: SynAttributes
@@ -216,21 +221,25 @@ type SynEnumCaseRcd = {
     Constant: SynConst
     XmlDoc: PreXmlDoc
     Range: range }
+with
+    member x.FromRcd =
+        SynEnumCase.EnumCase(x.Attributes, x.Id, x.Constant, x.XmlDoc, x.Range)
 
 type SynEnumCase with
-    member x.ToRcd
-        with get() =
-            match x with
-            | EnumCase(attributes, id, constant, xmlDoc, range) ->
-                { Attributes = attributes; Id = id; Constant = constant; XmlDoc = xmlDoc; Range = range }
+    member x.ToRcd =
+        match x with
+        | EnumCase(attributes, id, constant, xmlDoc, range) ->
+            { Attributes = attributes; Id = id; Constant = constant; XmlDoc = xmlDoc; Range = range }
     
 type XmlDoc with
-    member x.Lines
-        with get() =
-            match x with
-            | XmlDoc lines -> lines
+    member x.Lines =
+        match x with
+        | XmlDoc lines -> lines
 
 type PreXmlDoc with
-    member x.Lines
-        with get() =
-            x.ToXmlDoc().Lines
+    member x.Lines  =
+        x.ToXmlDoc().Lines
+
+//type SynUnionCaeRcd = {} // TODO
+
+//type SynFieldRcd // TODO
