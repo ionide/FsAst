@@ -1,18 +1,15 @@
 [<AutoOpen>]
-module ConsoleApp.FormatFs
+module FsAst.FormatFs
 
 open System.IO
 open Fantomas
 
 let formatAst ast =
-    let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true } // no comments
-//    let noOriginalSourceCode = "//"
-//    CodeFormatter.formatAST ast noOriginalSourceCode cfg
+    let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true } // do not format comments
     CodeFormatter.FormatAST(ast, None, cfg)
 
-let formatFs() =
-    let s = File.ReadAllText @"..\..\Hello.fs"
-    let isFsi = false
-    let ast = CodeFormatter.parse isFsi s
+let formatFs fs =
+    let s = File.ReadAllText fs
+    let ast = CodeFormatter.Parse(fs, s)
     let txt = formatAst ast
     printfn "%s" txt

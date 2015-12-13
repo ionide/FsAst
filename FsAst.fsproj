@@ -49,7 +49,9 @@
   <ItemGroup>
     <None Include="paket.references" />
     <None Include="App.config" />
+    <Compile Include="printfn.fs" />
     <Compile Include="AstRcd.fs" />
+    <Compile Include="AstCreate.fs" />
     <Compile Include="PrintAstInfo.fs" />
     <Compile Include="FormatFs.fs" />
     <Compile Include="CreateAst.fs" />

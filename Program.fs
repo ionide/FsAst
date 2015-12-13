@@ -1,13 +1,19 @@
-﻿module ConsoleApp.Program
+﻿module FsAst.Program
 
 [<EntryPoint>]
 let main argv =
+    
+    let fs =
+//        @"..\..\Hello.fs"
+        @"..\..\Enum.fs"
+
     printfn "### printAstInfo\n"
-    PrintAstInfo.printAstInfo()
+    PrintAstInfo.printAstInfo fs
 
     printfn "\n### formatFs:\n"
-    FormatFs.formatFs()
+    FormatFs.formatFs fs
 
-    printfn "\n### createAst:\n"
-    CreateAst.createAst()
+    printfn "\n### create AST:\n"
+//    CreateAst.createBasicClass()
+    CreateAst.createBasicEnums()
     0
