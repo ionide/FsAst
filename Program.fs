@@ -11,10 +11,10 @@ let main argv =
     printfn "### printAstInfo\n"
     PrintAstInfo.printAstInfo fs
 
-    printfn "\n### formatFs:\n"
-    FormatFs.formatFs fs
-
-    printfn "\n### create AST:\n"
+//    printfn "\n### formatFs:\n"
+//    FormatFs.formatFs fs
+//
+//    printfn "\n### create AST:\n"
 //    CreateAst.createBasicClass()
 //    CreateAst.createBasicEnums()
     0

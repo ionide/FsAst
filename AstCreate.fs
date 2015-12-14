@@ -23,6 +23,13 @@ type LongIdentWithDots with
     /// create with 2 IDs
     static member Create2 a b =
         LongIdentWithDots([Ident.Create a; Ident.Create b], [range.Zero])
+    member x.AsString =
+        let sb = System.Text.StringBuilder()
+        for i in 0 .. x.Lid.Length - 2 do
+            sb.Append x.Lid.[i].idText |> ignore
+            sb.Append '.' |> ignore
+        sb.Append x.Lid.[x.Lid.Length-1].idText |> ignore
+        sb.ToString()
 
 type SynPat with
     static member CreateLongIdent texts =
