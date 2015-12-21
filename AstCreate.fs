@@ -60,6 +60,10 @@ type SynExpr with
         SynExpr.Ident(id)
     static member CreateLongIdent (isOptional, id, altNameRefCell) =
         SynExpr.LongIdent(isOptional, id, altNameRefCell, range.Zero)
+    static member CreateParen expr =
+        SynExpr.Paren(expr, range.Zero, None, range.Zero)
+    static member CreateTuple list =
+        SynExpr.Tuple(list, [], range.Zero)
 
 type SynConst with
     static member CreateString s =

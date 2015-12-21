@@ -71,6 +71,21 @@ let createBasicPInvoke() =
     let unitExpr = SynExpr.CreateIdent(Ident.Create "unit")
     let unitType = SynType.CreateLongIdent(LongIdentWithDots.Create1 "unit")
 
+//    let at = Microsoft.FSharp.Compiler.Ast.SynAttribut
+    let at : SynAttribute = 
+        {   TypeName = LongIdentWithDots.Create1 "DllImport"
+            ArgExpr =
+                SynExpr.CreateParen(
+                    SynExpr.CreateTuple(
+                        [   SynExpr.CreateConst(SynConst.CreateString "blas.dll")
+                        ]
+                    )
+                )
+            Target = None
+            AppliesToGetterAndSetter = false
+            Range = range.Zero
+        }
+
     let dgemm = SynModuleDecl.CreateLet([
         { SynBindingRcd.Null with
 //            Kind = SynBindingKind.StandaloneExpression
@@ -82,6 +97,7 @@ let createBasicPInvoke() =
                 )
             ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, [], false), range.Zero, []) |> Some
             ValData = SynValData(None, SynValInfo([], SynArgInfo(SynAttributes.Empty, false, None)), None)
+            Attributes = [at]
         }
     ])
 
