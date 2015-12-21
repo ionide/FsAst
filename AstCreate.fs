@@ -49,25 +49,31 @@ type MemberFlags with
     static member StaticMember =
         { MemberFlags.InstanceMember with IsInstance = false }
 
+type SynConst with
+    static member CreateString s =
+        SynConst.String(s, range.Zero)
+
 type SynExpr with
     static member CreateConst cnst =
         SynExpr.Const(cnst, range.Zero)
+    static member CreateConstString s =
+        SynExpr.CreateConst (SynConst.CreateString s)
     static member CreateTyped (expr, typ) =
         SynExpr.Typed(expr, typ, range.Zero)
-    static member CreateApp (exprAtomicFlag, isInfix, funcExpr, argExpr) =
-        SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range.Zero)
+    static member CreateApp (funcExpr, argExpr) =
+        SynExpr.App(ExprAtomicFlag.NonAtomic, false, funcExpr, argExpr, range.Zero)
+    static member CreateAppInfix (funcExpr, argExpr) =
+        SynExpr.App(ExprAtomicFlag.NonAtomic, true, funcExpr, argExpr, range.Zero)
     static member CreateIdent id =
         SynExpr.Ident(id)
+    static member CreateIdentString id =
+        SynExpr.Ident(Ident.Create id)
     static member CreateLongIdent (isOptional, id, altNameRefCell) =
         SynExpr.LongIdent(isOptional, id, altNameRefCell, range.Zero)
     static member CreateParen expr =
         SynExpr.Paren(expr, range.Zero, None, range.Zero)
     static member CreateTuple list =
         SynExpr.Tuple(list, [], range.Zero)
-
-type SynConst with
-    static member CreateString s =
-        SynConst.String(s, range.Zero)
 
 type SynType with
     static member CreateApp (typ, args, isPostfix) =

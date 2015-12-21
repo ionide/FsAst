@@ -68,16 +68,21 @@ let createBasicPInvoke() =
 
     let opn = SynModuleDecl.CreateOpen (LongIdentWithDots.Create ["System"; "Runtime"; "InteropServices"])
         
-    let unitExpr = SynExpr.CreateIdent(Ident.Create "unit")
+    let unitExpr = SynExpr.CreateIdentString "unit"
     let unitType = SynType.CreateLongIdent(LongIdentWithDots.Create1 "unit")
 
-//    let at = Microsoft.FSharp.Compiler.Ast.SynAttribut
     let at : SynAttribute = 
         {   TypeName = LongIdentWithDots.Create1 "DllImport"
             ArgExpr =
                 SynExpr.CreateParen(
                     SynExpr.CreateTuple(
-                        [   SynExpr.CreateConst(SynConst.CreateString "blas.dll")
+                        [   SynExpr.CreateConstString "blas.dll"
+                            SynExpr.CreateApp(
+                                SynExpr.CreateAppInfix(
+                                    SynExpr.CreateIdentString "op_Equality",
+                                    SynExpr.CreateIdentString "EntryPoint"),
+                                SynExpr.CreateConstString "dgemm_"
+                            )
                         ]
                     )
                 )
@@ -88,11 +93,10 @@ let createBasicPInvoke() =
 
     let dgemm = SynModuleDecl.CreateLet([
         { SynBindingRcd.Null with
-//            Kind = SynBindingKind.StandaloneExpression
             Pattern = SynPat.CreateLongIdent1 "dgemm_"
             Expr = 
                 SynExpr.CreateTyped(
-                    SynExpr.CreateApp(ExprAtomicFlag.NonAtomic, false, unitExpr, SynExpr.CreateConst (SynConst.CreateString "extern was not given a DllImport attribute")),
+                    SynExpr.CreateApp(unitExpr, SynExpr.CreateConstString "extern was not given a DllImport attribute"),
                     SynType.CreateApp(unitType, [], false)
                 )
             ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, [], false), range.Zero, []) |> Some
