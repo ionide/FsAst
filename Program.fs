@@ -14,7 +14,8 @@ let main argv =
 //    printfn "\n### formatFs:\n"
 //    FormatFs.formatFs fs
 //
-//    printfn "\n### create AST:\n"
+    printfn "\n### create AST:\n"
 //    CreateAst.createBasicClass()
 //    CreateAst.createBasicEnums()
+    CreateAst.createBasicPInvoke()
     0

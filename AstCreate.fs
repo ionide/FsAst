@@ -52,6 +52,24 @@ type MemberFlags with
 type SynExpr with
     static member CreateConst cnst =
         SynExpr.Const(cnst, range.Zero)
+    static member CreateTyped (expr, typ) =
+        SynExpr.Typed(expr, typ, range.Zero)
+    static member CreateApp (exprAtomicFlag, isInfix, funcExpr, argExpr) =
+        SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range.Zero)
+    static member CreateIdent id =
+        SynExpr.Ident(id)
+    static member CreateLongIdent (isOptional, id, altNameRefCell) =
+        SynExpr.LongIdent(isOptional, id, altNameRefCell, range.Zero)
+
+type SynConst with
+    static member CreateString s =
+        SynConst.String(s, range.Zero)
+
+type SynType with
+    static member CreateApp (typ, args, isPostfix) =
+        SynType.App(typ, None, args, [], None, isPostfix, range.Zero)
+    static member CreateLongIdent id =
+        SynType.LongIdent(id)
 
 type SynBindingRcd with
     static member Null =
@@ -114,6 +132,10 @@ type SynModuleDecl with
         SynModuleDecl.Types([SynTypeDefnRcd.Create(info,members).FromRcd], range.Zero)
     static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd) =
         SynModuleDecl.Types([SynTypeDefnRcd.CreateSimple(info, simple.FromRcd).FromRcd], range.Zero)
+    static member CreateOpen id =
+        SynModuleDecl.Open(id, range.Zero)
+    static member CreateLet (bindings: SynBindingRcd list) =
+        SynModuleDecl.Let(false, bindings |> List.map(fun b -> b.FromRcd), range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =

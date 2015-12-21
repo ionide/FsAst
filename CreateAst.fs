@@ -62,3 +62,37 @@ let createBasicEnums() =
     )
     |> formatAst
     |> printfn "%s"
+
+let createBasicPInvoke() =
+    let mdl = "BasicPInvoke"
+
+    let opn = SynModuleDecl.CreateOpen (LongIdentWithDots.Create ["System"; "Runtime"; "InteropServices"])
+        
+    let unitExpr = SynExpr.CreateIdent(Ident.Create "unit")
+    let unitType = SynType.CreateLongIdent(LongIdentWithDots.Create1 "unit")
+
+    let dgemm = SynModuleDecl.CreateLet([
+        { SynBindingRcd.Null with
+//            Kind = SynBindingKind.StandaloneExpression
+            Pattern = SynPat.CreateLongIdent1 "dgemm_"
+            Expr = 
+                SynExpr.CreateTyped(
+                    SynExpr.CreateApp(ExprAtomicFlag.NonAtomic, false, unitExpr, SynExpr.CreateConst (SynConst.CreateString "extern was not given a DllImport attribute")),
+                    SynType.CreateApp(unitType, [], false)
+                )
+            ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, [], false), range.Zero, []) |> Some
+            ValData = SynValData(None, SynValInfo([], SynArgInfo(SynAttributes.Empty, false, None)), None)
+        }
+    ])
+
+    // create file
+    ParsedInput.CreateImplFile(
+        ParsedImplFileInputRcd.CreateFs(mdl)
+            .AddModule(
+                SynModuleOrNamespaceRcd.CreateModule(Ident.Create1 mdl)
+                    .AddDeclaration(opn)
+                    .AddDeclaration(dgemm)
+            )
+    )
+    |> formatAst
+    |> printfn "%s"

@@ -30,10 +30,10 @@ let rec printExpr indent expr =
         printfn "%*sTuple expr %d" indent "" exprs.Length
         for exp in exprs do
             printExpr (indent+2) exp
-    | SynExpr.App(atomicFlag, _, exprA, exprB, _) ->
+    | SynExpr.App(atomicFlag, _, funcExpr, argExpr, _) ->
         printfn "%*sApp expr: atomic: %A" indent "" atomicFlag
-        printExpr (indent+2) exprA
-        printExpr (indent+2) exprB
+        printExpr (indent+2) funcExpr
+        printExpr (indent+2) argExpr
     | SynExpr.Ident id -> printfn "%*sIdent expr: %s" indent "" id.idText
     | SynExpr.Typed(exp, typ, _) ->
         printfn "%*sExpr Typed" indent ""
@@ -111,9 +111,10 @@ let printAstInfo filename =
             | SynModuleDecl.Open(id, _) ->
                 printfn "open: %s" id.AsString
             | SynModuleDecl.Let(a, bindings, _) ->
-                printfn "%d bindings" bindings.Length
+                printfn "%d let bindings, %b" bindings.Length a
                 for binding in bindings |> List.map (fun b -> b.ToRcd) do
 //                    printfn "binding: %A" binding
+                    printfn "  binding kind: %A" binding.Kind
                     printExpr 2 binding.Expr
                     
                     match binding.ReturnInfo with
