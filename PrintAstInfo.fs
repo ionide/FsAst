@@ -87,7 +87,7 @@ let printAstInfo filename =
             match decl with
             | SynModuleDecl.Types(types, _) ->
                 let t = types.Head.ToRcd
-                let info = t.Info.ToRcd
+                let info = t.Info
                 printfn "type: %s" info.Id.Head.idText
                 for xd in info.XmlDoc.Lines do
                     printfn "  xmldoc: %s" xd
@@ -97,7 +97,7 @@ let printAstInfo filename =
                     match om.Members.[1] with
                     | SynMemberDefn.Member(b, _) ->
                         let br = b.ToRcd
-                        printPattern 2 br.Pattern
+                        printPattern 2 br.Pattern.FromRcd
                         printExpr 2 br.Expr
                     | mbr -> printfn "mbr not matched: %A" mbr
                 | SynTypeDefnReprRcd.Simple simple ->
@@ -138,6 +138,6 @@ let printAstInfo filename =
                                 match arg with
                                 | SynArgInfo.SynArgInfo(attrs, _, id) ->
                                     printfn "    arg: %A" id
-                    printPattern 2 binding.Pattern
+                    printPattern 2 binding.Pattern.FromRcd
             | decl -> printfn "decl not matched: %A" decl
     | input -> printfn "input not matched: %A" input

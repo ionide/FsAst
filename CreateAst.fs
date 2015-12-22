@@ -11,11 +11,11 @@ let createBasicClass() =
     // create Type
     let typ =
         SynModuleDecl.CreateType (
-            SynComponentInfoRcd.Create (Ident.Create1 "Triangle"),
+            SynComponentInfoRcd.Create (Ident.CreateLong "Triangle"),
             [   SynMemberDefn.CreateImplicitCtor()
                 SynMemberDefn.CreateMember
                     { SynBindingRcd.Null with
-                        Pattern = SynPat.CreateLongIdent2 "x" "Points"
+                        Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString "x.Points", [])
                         Expr = SynExpr.CreateConst(SynConst.Int32 3)
                     }
             ]
@@ -25,7 +25,7 @@ let createBasicClass() =
     ParsedInput.CreateImplFile(
         ParsedImplFileInputRcd.CreateFs(mdl)
             .AddModule(
-                SynModuleOrNamespaceRcd.CreateModule(Ident.Create1 mdl)
+                SynModuleOrNamespaceRcd.CreateModule(Ident.CreateLong mdl)
                     .AddDeclaration(typ)
             )
     )
@@ -38,7 +38,7 @@ let createBasicEnums() =
     // create Type
     let typ =
         SynModuleDecl.CreateSimpleType (
-            { SynComponentInfoRcd.Create (Ident.Create1 "CXErrorCode") with
+            { SynComponentInfoRcd.Create (Ident.CreateLong "CXErrorCode") with
                 XmlDoc = PreXmlDoc.Create [ " enum uint32" ]
             },
             SynTypeDefnSimpleReprEnumRcd.Create(
@@ -56,7 +56,7 @@ let createBasicEnums() =
     ParsedInput.CreateImplFile(
         ParsedImplFileInputRcd.CreateFs(mdl)
             .AddModule(
-                SynModuleOrNamespaceRcd.CreateModule(Ident.Create1 mdl)
+                SynModuleOrNamespaceRcd.CreateModule(Ident.CreateLong mdl)
                     .AddDeclaration(typ)
             )
     )
@@ -66,13 +66,10 @@ let createBasicEnums() =
 let createBasicPInvoke() =
     let mdl = "BasicPInvoke"
 
-    let opn = SynModuleDecl.CreateOpen (LongIdentWithDots.Create ["System"; "Runtime"; "InteropServices"])
+    let opn = SynModuleDecl.CreateOpen (LongIdentWithDots.CreateString "System.Runtime.InteropServices")
         
-    let unitExpr = SynExpr.CreateIdentString "unit"
-    let unitType = SynType.CreateLongIdent(LongIdentWithDots.Create1 "unit")
-
     let at : SynAttribute = 
-        {   TypeName = LongIdentWithDots.Create1 "DllImport"
+        {   TypeName = LongIdentWithDots.CreateString "DllImport"
             ArgExpr =
                 SynExpr.CreateParen(
                     SynExpr.CreateTuple(
@@ -91,16 +88,36 @@ let createBasicPInvoke() =
             Range = range.Zero
         }
 
+    let pats =
+        [   
+            SynPatRcd.CreateTuple(
+                [   SynPatRcd.CreateAttrib(
+                        SynPatRcd.CreateTyped(
+                            SynPatRcd.CreateNamed(
+                                Ident.Create "transa",
+                                SynPatRcd.CreateWild
+                            ),
+                            SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "nativeptr"),
+                                [SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "char"), [])])
+                        ),
+                        []
+                    )
+                ]
+            )
+        ]
+
+    let unitExpr = SynExpr.CreateIdentString "unit"
+    let unitType = SynType.CreateLongIdent(LongIdentWithDots.CreateString "unit")
+
     let dgemm = SynModuleDecl.CreateLet([
-        { SynBindingRcd.Null with
-            Pattern = SynPat.CreateLongIdent1 "dgemm_"
+        { SynBindingRcd.Let with
+            Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString "dgemm_", pats)
             Expr = 
                 SynExpr.CreateTyped(
                     SynExpr.CreateApp(unitExpr, SynExpr.CreateConstString "extern was not given a DllImport attribute"),
-                    SynType.CreateApp(unitType, [], false)
+                    SynType.CreateApp(unitType, [])
                 )
-            ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, [], false), range.Zero, []) |> Some
-            ValData = SynValData(None, SynValInfo([], SynArgInfo(SynAttributes.Empty, false, None)), None)
+            ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, []), range.Zero, []) |> Some
             Attributes = [at]
         }
     ])
@@ -109,7 +126,7 @@ let createBasicPInvoke() =
     ParsedInput.CreateImplFile(
         ParsedImplFileInputRcd.CreateFs(mdl)
             .AddModule(
-                SynModuleOrNamespaceRcd.CreateModule(Ident.Create1 mdl)
+                SynModuleOrNamespaceRcd.CreateModule(Ident.CreateLong mdl)
                     .AddDeclaration(opn)
                     .AddDeclaration(dgemm)
             )
