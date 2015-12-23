@@ -119,10 +119,8 @@ let printAstInfo filename =
                     
                     match binding.ReturnInfo with
                     | Some ri ->
-                        match ri with
-                        | SynBindingReturnInfo.SynBindingReturnInfo(tp, _, attrs) ->
-                            printfn "  returnInfo: attrs: %A" attrs
-                            printType 4 tp
+                        printfn "  returnInfo:"
+                        printType 4 ri.Type
                     | None -> ()
 
                     printfn "binding, %d attributes" binding.Attributes.Length

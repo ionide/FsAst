@@ -225,6 +225,19 @@ type SynPat with
 //        | SynPat.FromParseError
         | _ -> failwithf "SynPat.ToRcd not implemented for %A" x
 
+type SynBindingReturnInfoRcd = {
+    Type: SynType
+    Range: range
+    Attributes: SynAttributes
+    }
+with
+    member x.FromRcd = SynBindingReturnInfo(x.Type, x.Range, x.Attributes)
+
+type SynBindingReturnInfo with
+    member x.ToRcd =
+        let (SynBindingReturnInfo(typ, range, attributes)) = x
+        { Type = typ; Range = range; Attributes = attributes }
+
 type SynBindingRcd = {
     Access: SynAccess option
     Kind: SynBindingKind
@@ -234,18 +247,18 @@ type SynBindingRcd = {
     XmlDoc: PreXmlDoc
     ValData: SynValData
     Pattern: SynPatRcd
-    ReturnInfo: SynBindingReturnInfo option
+    ReturnInfo: SynBindingReturnInfoRcd option
     Expr: SynExpr
     Range: range
     Bind: SequencePointInfoForBinding }
 with
     member x.FromRcd =
-        Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo, x.Expr, x.Range, x.Bind)
+        Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
 
 type SynBinding with
     member x.ToRcd =
         let (Binding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
-        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo; Expr = rhsExpr; Range = mBind; Bind = spBind }
+        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo |> Option.map (fun ri -> ri.ToRcd); Expr = rhsExpr; Range = mBind; Bind = spBind }
 
 [<RequireQualifiedAccess>]
 type SynTypeDefnSimpleReprRcd =

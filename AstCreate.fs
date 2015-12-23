@@ -81,12 +81,16 @@ type SynExpr with
         SynExpr.Paren(expr, range.Zero, None, range.Zero)
     static member CreateTuple list =
         SynExpr.Tuple(list, [], range.Zero)
+    static member CreateNull =
+        SynExpr.Null(range.Zero)
 
 type SynType with
     static member CreateApp (typ, args) =
         SynType.App(typ, None, args, [], None, false, range.Zero)
     static member CreateLongIdent id =
         SynType.LongIdent(id)
+    static member CreateUnit =
+        SynType.CreateLongIdent(LongIdentWithDots.CreateString "unit")
 
 type SynArgInfo with
     static member Empty =
@@ -104,6 +108,10 @@ type SynValInfo with
     static member Empty =
         SynValInfo([], SynArgInfo.Empty)
         
+
+type SynBindingReturnInfoRcd with
+    static member Create typ =
+        { Type = typ; Range = range.Zero; Attributes = [] }
 
 type SynBindingRcd with
     static member Null =
@@ -123,6 +131,7 @@ type SynBindingRcd with
     static member Let =
         { SynBindingRcd.Null with
             ValData = SynValData(None, SynValInfo([], SynArgInfo.Empty), None)
+            Expr = SynExpr.CreateTyped(SynExpr.CreateNull, SynType.CreateUnit)
         }
 
 type SynComponentInfoRcd with

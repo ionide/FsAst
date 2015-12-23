@@ -88,36 +88,36 @@ let createBasicPInvoke() =
             Range = range.Zero
         }
 
-    let pats =
-        [   
-            SynPatRcd.CreateTuple(
-                [   SynPatRcd.CreateAttrib(
-                        SynPatRcd.CreateTyped(
-                            SynPatRcd.CreateNamed(
-                                Ident.Create "transa",
-                                SynPatRcd.CreateWild
-                            ),
-                            SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "nativeptr"),
-                                [SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "char"), [])])
-                        ),
-                        []
-                    )
-                ]
-            )
+    let args =
+        [   "char", "transa"
+            "char", "transb"
+            "int", "m"
+            "int", "n"
+            "int", "k"
+            "double", "alpha"
+            "double", "a"
+            "int", "lda"
+            "double", "b"
+            "int", "ldb"
+            "double", "beta"
+            "double", "c"
+            "int", "ldc"
         ]
-
-    let unitExpr = SynExpr.CreateIdentString "unit"
-    let unitType = SynType.CreateLongIdent(LongIdentWithDots.CreateString "unit")
+        |> List.map (fun (typ, name) ->
+            SynPatRcd.CreateAttrib(
+                SynPatRcd.CreateTyped(
+                    SynPatRcd.CreateNamed(Ident.Create name, SynPatRcd.CreateWild),
+                    SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "nativeptr"),
+                        [SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString typ), [])])
+                ),
+                []
+            )
+        )
 
     let dgemm = SynModuleDecl.CreateLet([
         { SynBindingRcd.Let with
-            Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString "dgemm_", pats)
-            Expr = 
-                SynExpr.CreateTyped(
-                    SynExpr.CreateApp(unitExpr, SynExpr.CreateConstString "extern was not given a DllImport attribute"),
-                    SynType.CreateApp(unitType, [])
-                )
-            ReturnInfo = SynBindingReturnInfo.SynBindingReturnInfo(SynType.CreateApp(unitType, []), range.Zero, []) |> Some
+            Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString "dgemm_", [SynPatRcd.CreateTuple args])
+            ReturnInfo = SynBindingReturnInfoRcd.Create(SynType.CreateApp(SynType.CreateUnit, [])) |> Some
             Attributes = [at]
         }
     ])
