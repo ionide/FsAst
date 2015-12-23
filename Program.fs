@@ -5,7 +5,8 @@ let main argv =
     
     let fs =
 //        @"..\..\Hello.fs"
-        @"..\..\Enum.fs"
+//        @"..\..\Enum.fs"
+        @"..\..\PInvoke.fs"
 
     printfn "### printAstInfo\n"
     PrintAstInfo.printAstInfo fs
@@ -15,5 +16,6 @@ let main argv =
 
     printfn "\n### create AST:\n"
 //    CreateAst.createBasicClass()
-    CreateAst.createBasicEnums()
+//    CreateAst.createBasicEnums()
+    CreateAst.createBasicPInvoke()
     0
