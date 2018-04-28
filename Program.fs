@@ -4,9 +4,10 @@
 let main argv =
     
     let fs =
-//        @"..\..\Hello.fs"
-//        @"..\..\Enum.fs"
-        @"..\..\PInvoke.fs"
+       __SOURCE_DIRECTORY__ +
+        @"/Hello.fs"
+//        @"/Enum.fs"
+//        @"/PInvoke.fs"
 
     printfn "### printAstInfo\n"
     PrintAstInfo.printAstInfo fs
@@ -15,7 +16,7 @@ let main argv =
     FormatFs.formatFs fs
 
     printfn "\n### create AST:\n"
-//    CreateAst.createBasicClass()
+    CreateAst.createBasicClass()
 //    CreateAst.createBasicEnums()
-    CreateAst.createBasicPInvoke()
+//    CreateAst.createBasicPInvoke()
     0
