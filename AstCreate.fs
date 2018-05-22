@@ -257,12 +257,13 @@ type SynEnumCaseRcd with
         }
 
 type SynFieldRcd with
-    static member Create(id, typ) : SynFieldRcd =
+    static member Create(id, typ, ?isMutable) : SynFieldRcd =
+        let isMutable = defaultArg isMutable false
         {   Attributes = SynAttributes.Empty
             IsStatic = false
             Id = Some id
             Type = typ
-            IsMutable = false
+            IsMutable = isMutable
             XmlDoc = PreXmlDoc.Empty
             Access = None
             Range = range.Zero 
