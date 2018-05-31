@@ -155,6 +155,8 @@ type SynMemberDefn with
         SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, [], None, range.Zero)
     static member CreateMember (binding:SynBindingRcd) =
         SynMemberDefn.Member(binding.FromRcd, range.Zero)
+    static member CreateInterface(interfaceType, members) =
+        SynMemberDefn.Interface(interfaceType, members, range.Zero)
 
 type SynTypeDefnReprObjectModelRcd with
     static member Create members =
