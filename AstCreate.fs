@@ -189,6 +189,14 @@ type SynModuleDecl with
         SynModuleDecl.Open(id, range.Zero)
     static member CreateLet (bindings: SynBindingRcd list) =
         SynModuleDecl.Let(false, bindings |> List.map(fun b -> b.FromRcd), range.Zero)
+    static member CreateAttribute(ident, expr, isProp, ?target) =
+            { SynAttribute.TypeName = ident
+              SynAttribute.ArgExpr = expr
+              SynAttribute.Target = target
+              SynAttribute.AppliesToGetterAndSetter= isProp
+              SynAttribute.Range = range.Zero }
+    static member CreateAttributes(attributes) =
+        SynModuleDecl.Attributes(attributes, range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =
