@@ -1,6 +1,6 @@
 ﻿[<AutoOpen>]
 module FsAst.AstCreate
-
+open System
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
 
@@ -37,6 +37,8 @@ type SynPatRcd with
         SynPatRcd.LongIdent (SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynConstructorArgs.Pats ))
     static member CreateTuple patterns =
         SynPatRcd.Tuple { Patterns = patterns; Range = range.Zero }
+    static member CreateParen pattern =
+        SynPatRcd.Paren { Pattern = pattern; Range = range.Zero }
     static member CreateAttrib (pattern, attributes) =
         SynPatRcd.Attrib { Pattern = pattern; Attributes = attributes; Range = range.Zero }
     static member CreateTyped (pattern, typ) =
@@ -85,12 +87,14 @@ type SynExpr with
         SynExpr.Null(range.Zero)
 
 type SynType with
-    static member CreateApp (typ, args) =
-        SynType.App(typ, None, args, [], None, false, range.Zero)
+    static member CreateApp (typ, args, ?isPostfix) =
+        SynType.App(typ, None, args, [], None, (defaultArg isPostfix false), range.Zero)
     static member CreateLongIdent id =
         SynType.LongIdent(id)
+    static member CreateLongIdent s =
+        SynType.CreateLongIdent(LongIdentWithDots.CreateString s)
     static member CreateUnit =
-        SynType.CreateLongIdent(LongIdentWithDots.CreateString "unit")
+        SynType.CreateLongIdent("unit")      
 
 type SynArgInfo with
     static member Empty =
@@ -151,6 +155,8 @@ type SynMemberDefn with
         SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, [], None, range.Zero)
     static member CreateMember (binding:SynBindingRcd) =
         SynMemberDefn.Member(binding.FromRcd, range.Zero)
+    static member CreateInterface(interfaceType, members) =
+        SynMemberDefn.Interface(interfaceType, members, range.Zero)
 
 type SynTypeDefnReprObjectModelRcd with
     static member Create members =
@@ -167,26 +173,35 @@ type SynTypeDefnRcd with
             Members = []
             Range = range.Zero
         }
-    static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr) =
+    static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr, ?members) =
         {   Info = info
             Repr =  SynTypeDefnRepr.Simple(simple, range.Zero)
-            Members = []
+            Members = Option.defaultValue [] members
             Range = range.Zero
         }
 
 type SynModuleDecl with
     static member CreateType (info, members) =
-        SynModuleDecl.Types([SynTypeDefnRcd.Create(info,members).FromRcd], range.Zero)
-    static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd) =
-        SynModuleDecl.Types([SynTypeDefnRcd.CreateSimple(info, simple.FromRcd).FromRcd], range.Zero)
+        SynModuleDecl.Types([SynTypeDefnRcd.Create(info, members).FromRcd], range.Zero)
+    static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd, ?members) =
+        SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members ).FromRcd], range.Zero)
     static member CreateOpen id =
         SynModuleDecl.Open(id, range.Zero)
     static member CreateLet (bindings: SynBindingRcd list) =
         SynModuleDecl.Let(false, bindings |> List.map(fun b -> b.FromRcd), range.Zero)
+    static member CreateAttribute(ident, expr, isProp, ?target) =
+            { SynAttribute.TypeName = ident
+              SynAttribute.ArgExpr = expr
+              SynAttribute.Target = target
+              SynAttribute.AppliesToGetterAndSetter= isProp
+              SynAttribute.Range = range.Zero }
+    static member CreateAttributes(attributes) =
+        SynModuleDecl.Attributes(attributes, range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =
         {   Id = id
+            IsRecursive = false
             IsModule = true
             Declarations = []
             XmlDoc = PreXmlDoc.Empty
@@ -214,11 +229,13 @@ type ParsedImplFileInputRcd with
             HashDirectives = []
             Modules = []
             IsLastCompiland = true
+            IsExe = false
         }
     member x.AddModules (modules: SynModuleOrNamespaceRcd list) =
         { x with
             Modules = List.append x.Modules (modules |> List.map (fun m -> m.FromRcd))
         }
+        
     member x.AddModule mdl =
         x.AddModules [mdl]
 
@@ -235,8 +252,8 @@ type SynTypeDefnSimpleReprEnumRcd with
         { Cases = (cases |> List.map (fun c -> c.FromRcd)); Range = range.Zero }
 
 type SynTypeDefnSimpleReprRecordRcd with
-    static member Create fields = // TODO SynFieldRcd list
-        { Access = None; Fields = fields; Range = range.Zero }
+    static member Create (fields: SynFieldRcd list) = 
+        { Access = None; Fields = (fields |> List.map (fun f -> f.FromRcd)); Range = range.Zero }
 
 //type SynUnionCase with // TODO
 
@@ -248,6 +265,27 @@ type SynEnumCaseRcd with
             XmlDoc = PreXmlDoc.Empty
             Range = range.Zero
         }
+
+type SynFieldRcd with
+    static member Create(id, typ, ?isMutable) : SynFieldRcd =
+        let isMutable = defaultArg isMutable false
+        {   Attributes = SynAttributes.Empty
+            IsStatic = false
+            Id = Some id
+            Type = typ
+            IsMutable = isMutable
+            XmlDoc = PreXmlDoc.Empty
+            Access = None
+            Range = range.Zero 
+        }
+    static member Create(id, typ) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent typ)
+    static member CreateInt(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int") 
+    static member CreateString(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string")
+    static member CreateApp id typ args =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateApp(SynType.CreateLongIdent typ, args |> List.map (SynType.CreateLongIdent)))
 
 type PreXmlDoc with
     static member Create lines =

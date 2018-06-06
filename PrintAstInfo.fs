@@ -107,7 +107,17 @@ let printAstInfo filename =
                             let cr = c.ToRcd
                             printfn "  case: %s: %A" cr.Id.idText cr.Constant
                             printfn "    attributes: %A" cr.Attributes
+                    | SynTypeDefnSimpleReprRcd.Record record ->
+                        for field in record.Fields do
+                            match field with
+                            | SynField.Field(attribs, isstatic, ident, typ, e, prexmldoc, access, range) ->
+                                printfn "%s:" 
+                                    (match ident with
+                                     | Some i -> i.idText
+                                     | None -> "")
+                                printType 4 typ
                     | repr -> printfn "not matched: %A" repr
+                printfn "Members: %A" t.Members
             | SynModuleDecl.Open(id, _) ->
                 printfn "open: %s" id.AsString
             | SynModuleDecl.Let(a, bindings, _) ->
