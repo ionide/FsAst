@@ -105,6 +105,7 @@ type SynTypeDefnRepr with
             SynTypeDefnReprRcd.ObjectModel { Kind = kind; Members = members; Range = range }
         | SynTypeDefnRepr.Simple(repr, range) ->
             SynTypeDefnReprRcd.Simple { Repr = repr; Range = range }
+        | SynTypeDefnRepr.Exception _ -> failwith "Not supported"
 
 // TODO other SynPat cases
 [<RequireQualifiedAccess>]
@@ -358,6 +359,7 @@ type SynTypeDefnSimpleRepr with
             SynTypeDefnSimpleReprRcd.TypeAbbrev { ParseDetail = parseDetail; Type = typ; Range = range }
         | SynTypeDefnSimpleRepr.None(range) ->
             SynTypeDefnSimpleReprRcd.None { Range = range }
+        | SynTypeDefnSimpleRepr.Exception _ -> failwith "not supported"
 
 type SynEnumCaseRcd = {
     Attributes: SynAttributes
@@ -384,7 +386,23 @@ type PreXmlDoc with
     member x.Lines  =
         x.ToXmlDoc().Lines
 
-//type SynUnionCaeRcd = {} // TODO
+
+type SynUnionCaseRcd = {
+    Attributes: SynAttributes
+    Id: Ident
+    Type: SynUnionCaseType
+    XmlDoc: PreXmlDoc
+    Access: SynAccess option
+    Range: range }
+with
+    member x.FromRcd =
+        SynUnionCase.UnionCase(x.Attributes, x.Id, x.Type, x.XmlDoc, x.Access, x.Range)
+        
+type SynUnionCase with
+    member x.ToRcd : SynUnionCaseRcd =
+        match x with
+        | SynUnionCase.UnionCase(attributes, id, typ, xmlDoc, access, range) ->
+            { Attributes = attributes; Id = id; Type = typ; XmlDoc = xmlDoc; Access = access; Range = range }
 
 type SynFieldRcd = {
     Attributes: SynAttributes
@@ -403,5 +421,12 @@ type SynField with
     member x.ToRcd: SynFieldRcd =
         match x with
         | SynField.Field(attributes, isstatic, id, typ, ismutable, xmlDoc, access, range) ->
-             { Attributes = attributes; IsStatic = isstatic; Id = id; Type = typ; IsMutable = ismutable; XmlDoc = xmlDoc; Access = access; Range = range }
+             { Attributes = attributes
+               IsStatic = isstatic
+               Id = id
+               Type = typ
+               IsMutable = ismutable
+               XmlDoc = xmlDoc
+               Access = access
+               Range = range }
     
