@@ -1,432 +1,316 @@
 [<AutoOpen>]
-module FsAst.AstRcd
-
+module FsAst.AstCreate
 open System
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
 
-type ParsedImplFileInputRcd = { 
-    File: string
-    IsScript: bool
-    QualName: QualifiedNameOfFile
-    Pragmas: ScopedPragma list
-    HashDirectives: ParsedHashDirective list
-    Modules: SynModuleOrNamespace list
-    IsLastCompiland: bool
-    IsExe: bool }
-with
-    member x.FromRcd =
-        ParsedImplFileInput(x.File, x.IsScript, x.QualName, x.Pragmas, x.HashDirectives, x.Modules, (x.IsLastCompiland, x.IsExe))
+type Ident with
+    static member Create text =
+        Ident(text, range.Zero)
+    static member CreateLong (text: string) =
+        text.Split([|'.'|]) |> List.ofArray |> List.map Ident.Create
 
-type ParsedImplFileInput with
-    member x.ToRcd =
-        let (ParsedImplFileInput(file, isScript, qualName, pragmas, hashDirectives, modules, (isLastCompiland, isExe))) = x
-        { File = file; IsScript = isScript; QualName = qualName; Pragmas = pragmas; HashDirectives = hashDirectives; Modules = modules; IsLastCompiland = isLastCompiland; IsExe = isExe }
+type LongIdentWithDots with
+    static member Create texts =
+        LongIdentWithDots(texts |> List.map Ident.Create, [])
+    static member CreateString (text: string) =
+        LongIdentWithDots(Ident.CreateLong text, [])
 
-type SynModuleOrNamespaceRcd = {
-    Id: LongIdent
-    IsRecursive: bool
-    IsModule: bool
-    Declarations: SynModuleDecls
-    XmlDoc: PreXmlDoc
-    Attributes: SynAttributes
-    Access: SynAccess option
-    Range: range }
-with
-    member x.FromRcd =
-        SynModuleOrNamespace(x.Id, x.IsRecursive, x.IsModule, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
+    member x.AsString =
+        let sb = System.Text.StringBuilder()
+        for i in 0 .. x.Lid.Length - 2 do
+            sb.Append x.Lid.[i].idText |> ignore
+            sb.Append '.' |> ignore
+        sb.Append x.Lid.[x.Lid.Length-1].idText |> ignore
+        sb.ToString()
 
-type SynModuleOrNamespace with
-    member x.ToRcd =
-        let (SynModuleOrNamespace(id, isRecursive, isModule, declarations, xmlDoc, attributes, access, range)) = x
-        { Id = id; IsRecursive = isRecursive; IsModule = isModule; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
+type SynPatLongIdentRcd with
+    static member Create (id, args) =
+        { Id = id; Args = args; Access = None; Range = range.Zero }
 
-type SynComponentInfoRcd = {
-    Attributes: SynAttributes
-    Parameters: SynTyparDecl list
-    Constraints: SynTypeConstraint list
-    Id: LongIdent
-    XmlDoc: PreXmlDoc
-    PreferPostfix: bool
-    Access: SynAccess option
-    Range: range }
-with
-    member x.FromRcd =
-        ComponentInfo(x.Attributes, x.Parameters, x.Constraints, x.Id, x.XmlDoc, x.PreferPostfix, x.Access, x.Range)
+type SynConstructorArgs with
+    static member Empty =
+        SynConstructorArgs.Pats[]
 
-type SynComponentInfo with
-    member x.ToRcd =
-        let (ComponentInfo(attributes, parameters, constraints, id, xmldoc, preferPostfix, access, range)) = x
-        { Attributes = attributes; Parameters = parameters; Constraints = constraints; Id = id; XmlDoc = xmldoc; PreferPostfix = preferPostfix; Access = access; Range = range }
+type SynPatRcd with
+    static member CreateLongIdent (id, args: SynPatRcd list) =
+        SynPatRcd.LongIdent (SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynConstructorArgs.Pats ))
+    static member CreateTuple patterns =
+        SynPatRcd.Tuple { Patterns = patterns; Range = range.Zero }
+    static member CreateParen pattern =
+        SynPatRcd.Paren { Pattern = pattern; Range = range.Zero }
+    static member CreateAttrib (pattern, attributes) =
+        SynPatRcd.Attrib { Pattern = pattern; Attributes = attributes; Range = range.Zero }
+    static member CreateTyped (pattern, typ) =
+        SynPatRcd.Typed { Pattern = pattern; Type = typ; Range = range.Zero }
+    static member CreateNamed (id, pattern) =
+        SynPatRcd.Named { Pattern = pattern; Id = id; IsThis = false; Access = None; Range = range.Zero }
+    static member CreateWild =
+        SynPatRcd.Wild { Range = range.Zero }
 
-type SynTypeDefnRcd = {
-    Info: SynComponentInfoRcd
-    Repr: SynTypeDefnRepr
-    Members: SynMemberDefns
-    Range: range }
-with
-    member x.FromRcd =
-        TypeDefn(x.Info.FromRcd, x.Repr, x.Members, x.Range)
+type QualifiedNameOfFile with
+    static member Create name =
+        QualifiedNameOfFile(Ident.Create name)
 
-type SynTypeDefn with
-    member x.ToRcd =
-        let (TypeDefn(info, repr, members, range)) = x
-        { Info = info.ToRcd; Repr = repr; Members = members; Range = range }
+type MemberFlags with
+    static member InstanceMember =
+        { IsInstance = true; MemberKind = MemberKind.Member; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false }
+    static member StaticMember =
+        { MemberFlags.InstanceMember with IsInstance = false }
 
-type SynTypeDefnReprObjectModelRcd = {
-    Kind: SynTypeDefnKind
-    Members: SynMemberDefns
-    Range: range }
-with
-    member x.FromRcd =
-        SynTypeDefnRepr.ObjectModel(x.Kind, x.Members, x.Range)
+type SynConst with
+    static member CreateString s =
+        SynConst.String(s, range.Zero)
 
-type SynTypeDefnReprSimpleRcd = {
-    Repr: SynTypeDefnSimpleRepr
-    Range: range }
-with
-    member x.FromRcd = 
-        SynTypeDefnRepr.Simple(x.Repr, x.Range)
+type SynExpr with
+    static member CreateConst cnst =
+        SynExpr.Const(cnst, range.Zero)
+    static member CreateConstString s =
+        SynExpr.CreateConst (SynConst.CreateString s)
+    static member CreateTyped (expr, typ) =
+        SynExpr.Typed(expr, typ, range.Zero)
+    static member CreateApp (funcExpr, argExpr) =
+        SynExpr.App(ExprAtomicFlag.NonAtomic, false, funcExpr, argExpr, range.Zero)
+    static member CreateAppInfix (funcExpr, argExpr) =
+        SynExpr.App(ExprAtomicFlag.NonAtomic, true, funcExpr, argExpr, range.Zero)
+    static member CreateIdent id =
+        SynExpr.Ident(id)
+    static member CreateIdentString id =
+        SynExpr.Ident(Ident.Create id)
+    static member CreateLongIdent (isOptional, id, altNameRefCell) =
+        SynExpr.LongIdent(isOptional, id, altNameRefCell, range.Zero)
+    static member CreateParen expr =
+        SynExpr.Paren(expr, range.Zero, None, range.Zero)
+    static member CreateTuple list =
+        SynExpr.Tuple(list, [], range.Zero)
+    static member CreateNull =
+        SynExpr.Null(range.Zero)
 
-[<RequireQualifiedAccess>]
-type SynTypeDefnReprRcd =
-    | ObjectModel of SynTypeDefnReprObjectModelRcd
-    | Simple of SynTypeDefnReprSimpleRcd
-with 
-    member x.FromRcd =
-        match x with
-        | ObjectModel om -> om.FromRcd
-        | Simple s -> s.FromRcd
+type SynType with
+    static member CreateApp (typ, args, ?isPostfix) =
+        SynType.App(typ, None, args, [], None, (defaultArg isPostfix false), range.Zero)
+    static member CreateLongIdent id =
+        SynType.LongIdent(id)
+    static member CreateLongIdent s =
+        SynType.CreateLongIdent(LongIdentWithDots.CreateString s)
+    static member CreateUnit =
+        SynType.CreateLongIdent("unit")      
 
-type SynTypeDefnRepr with
-    member x.ToRcd =
-        match x with
-        | SynTypeDefnRepr.ObjectModel(kind, members, range) ->
-            SynTypeDefnReprRcd.ObjectModel { Kind = kind; Members = members; Range = range }
-        | SynTypeDefnRepr.Simple(repr, range) ->
-            SynTypeDefnReprRcd.Simple { Repr = repr; Range = range }
-        | SynTypeDefnRepr.Exception _ -> failwith "Not supported"
+type SynArgInfo with
+    static member Empty =
+        SynArgInfo(SynAttributes.Empty, false, None)
+    static member CreateId id =
+        SynArgInfo(SynAttributes.Empty, false, Some id)
+    static member CreateIdString id =
+        SynArgInfo.CreateId(Ident.Create id)
 
-// TODO other SynPat cases
-[<RequireQualifiedAccess>]
-type SynPatRcd =
-    | Const of SynPatConstRcd
-    | Wild of SynPatWildRcd
-    | Named of SynPatNamedRcd
-    | Typed of SynPatTypedRcd
-    | Attrib of SynPatAttribRcd
-//    | Or
-//    | Ands
-    | LongIdent of SynPatLongIdentRcd
-    | Tuple of SynPatTupleRcd
-    | Paren of SynPatParenRcd
-//    | ArrayOrList
-//    | Record
-    | Null of SynPatNullRcd
-//    | OptionalVal
-//    | IsInst
-//    | QuoteExpr
-//    | DeprecatedCharRange
-//    | InstanceMember
-//    | FromParseError
+type SynPatRcd with
+    static member CreateNull =
+        SynPatRcd.Null { Range = range.Zero }
 
-and SynPatConstRcd = {
-    Const: SynConst
-    Range: range }
+type SynValInfo with
+    static member Empty =
+        SynValInfo([], SynArgInfo.Empty)
 
-and SynPatWildRcd = {
-    Range: range }
+type SynBindingReturnInfoRcd with
+    static member Create typ =
+        { Type = typ; Range = range.Zero; Attributes = [] }
 
-and SynPatNamedRcd = {
-    Pattern: SynPatRcd
-    Id: Ident
-    IsThis: bool
-    Access: SynAccess option
-    Range: range }
+type SynBindingRcd with
+    static member Null =
+        {   Access = None
+            Kind = SynBindingKind.NormalBinding
+            IsInline = false
+            IsMutable = false
+            Attributes = SynAttributes.Empty
+            XmlDoc = PreXmlDoc.Empty
+            ValData = SynValData(Some MemberFlags.InstanceMember, SynValInfo.Empty, None)
+            Pattern = SynPatRcd.CreateNull
+            ReturnInfo = None
+            Expr = SynExpr.Null range.Zero
+            Range = range.Zero
+            Bind = SequencePointInfoForBinding.NoSequencePointAtInvisibleBinding
+        }
+    static member Let =
+        { SynBindingRcd.Null with
+            ValData = SynValData(None, SynValInfo([], SynArgInfo.Empty), None)
+            Expr = SynExpr.CreateTyped(SynExpr.CreateNull, SynType.CreateUnit)
+        }
 
-and SynPatTypedRcd = {
-    Pattern: SynPatRcd
-    Type: SynType
-    Range: range }
+type SynComponentInfoRcd with
+    static member Create id =
+        {   Attributes = SynAttributes.Empty
+            Parameters = []
+            Constraints = []
+            Id = id
+            XmlDoc = PreXmlDoc.Empty
+            PreferPostfix = false
+            Access = None
+            Range = range.Zero
+        }
 
-and SynPatAttribRcd = {
-    Pattern: SynPatRcd
-    Attributes: SynAttributes
-    Range: range }
+type SynMemberDefn with
+    static member CreateImplicitCtor() =
+        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, [], None, range.Zero)
+    static member CreateMember (binding:SynBindingRcd) =
+        SynMemberDefn.Member(binding.FromRcd, range.Zero)
+    static member CreateInterface(interfaceType, members) =
+        SynMemberDefn.Interface(interfaceType, members, range.Zero)
 
-and SynPatLongIdentRcd = {
-    Id: LongIdentWithDots
-    Args: SynConstructorArgs
-    Access: SynAccess option
-    Range: range }
+type SynTypeDefnReprObjectModelRcd with
+    static member Create members =
+        {   //Kind = SynTypeDefnKind.TyconClass
+            Kind = SynTypeDefnKind.TyconUnspecified
+            Members = members
+            Range = range.Zero
+        }
 
-and SynPatTupleRcd = {
-    Patterns: SynPatRcd list
-    Range: range }
+type SynTypeDefnRcd with
+    static member Create (info: SynComponentInfoRcd, members) =
+        {   Info = info
+            Repr = SynTypeDefnReprObjectModelRcd.Create(members).FromRcd
+            Members = []
+            Range = range.Zero
+        }
+    static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr, ?members) =
+        {   Info = info
+            Repr =  SynTypeDefnRepr.Simple(simple, range.Zero)
+            Members = Option.defaultValue [] members
+            Range = range.Zero
+        }
 
-and SynPatParenRcd = {
-    Pattern: SynPatRcd
-    Range: range }
+type SynModuleDecl with
+    static member CreateType (info, members) =
+        SynModuleDecl.Types([SynTypeDefnRcd.Create(info, members).FromRcd], range.Zero)
+    static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd, ?members) =
+        SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members).FromRcd], range.Zero)
+    static member CreateOpen id =
+        SynModuleDecl.Open(id, range.Zero)
+    static member CreateLet (bindings: SynBindingRcd list) =
+        SynModuleDecl.Let(false, bindings |> List.map(fun b -> b.FromRcd), range.Zero)
+    static member CreateAttribute(ident, expr, isProp, ?target) =
+            { SynAttribute.TypeName = ident
+              SynAttribute.ArgExpr = expr
+              SynAttribute.Target = target
+              SynAttribute.AppliesToGetterAndSetter = isProp
+              SynAttribute.Range = range.Zero }
+    static member CreateAttributes(attributes) =
+        SynModuleDecl.Attributes(attributes, range.Zero)
 
-and SynPatNullRcd = {
-    Range: range }
+type SynModuleOrNamespaceRcd with
+    static member CreateModule id =
+        {   Id = id
+            IsRecursive = false
+            IsModule = true
+            Declarations = []
+            XmlDoc = PreXmlDoc.Empty
+            Attributes = SynAttributes.Empty
+            Access = None
+            Range = range.Zero
+        }
+    static member CreateNamespace id =
+        { SynModuleOrNamespaceRcd.CreateModule id with
+            IsModule = false
+        }
+    member x.AddDeclarations decls =
+        { x with
+            Declarations = List.append x.Declarations decls
+        }
+    member x.AddDeclaration decl =
+        x.AddDeclarations [decl]
 
-type SynPatRcd  with 
-    member x.FromRcd =
-        match x with
-        | Const c -> c.FromRcd
-        | Wild w -> w.FromRcd
-        | Named n -> n.FromRcd
-        | Typed t -> t.FromRcd
-        | Attrib a -> a.FromRcd
-        | LongIdent u -> u.FromRcd
-        | Tuple t -> t.FromRcd
-        | Paren t -> t.FromRcd
-        | Null n -> n.FromRcd
-and SynPatConstRcd with
-    member x.FromRcd = SynPat.Const(x.Const, x.Range)
-and SynPatWildRcd with
-    member x.FromRcd = SynPat.Wild(x.Range)
-and SynPatNamedRcd with
-    member x.FromRcd = SynPat.Named(x.Pattern.FromRcd, x.Id, x.IsThis, x.Access, x.Range)
-and SynPatTypedRcd with
-    member x.FromRcd = SynPat.Typed(x.Pattern.FromRcd, x.Type, x.Range)
-and SynPatAttribRcd with
-    member x.FromRcd = SynPat.Attrib(x.Pattern.FromRcd, x.Attributes, x.Range)
-and SynPatLongIdentRcd with
-    member x.FromRcd = SynPat.LongIdent(x.Id, None, None, x.Args, None, x.Range)
-and SynPatTupleRcd with
-    member x.FromRcd = SynPat.Tuple(x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
-and SynPatParenRcd with
-    member x.FromRcd = SynPat.Paren(x.Pattern.FromRcd, x.Range)
-and SynPatNullRcd with
-    member x.FromRcd = SynPat.Null(x.Range)
+type ParsedImplFileInputRcd with
+    static member CreateFs name =
+        {   File = sprintf "%s.fs" name
+            IsScript = false
+            QualName = QualifiedNameOfFile.Create name
+            Pragmas = []
+            HashDirectives = []
+            Modules = []
+            IsLastCompiland = true
+            IsExe = false
+        }
+    member x.AddModules (modules: SynModuleOrNamespaceRcd list) =
+        { x with
+            Modules = List.append x.Modules (modules |> List.map (fun m -> m.FromRcd))
+        }
+        
+    member x.AddModule mdl =
+        x.AddModules [mdl]
 
-type SynPat with
-    member x.ToRcd =
-        match x with
-        | SynPat.Const(cnst, range) ->
-            SynPatRcd.Const { Const = cnst; Range = range }
-        | SynPat.Wild range ->
-            SynPatRcd.Wild { Range = range }
-        | SynPat.Named(pattern, id, isThis, access, range) ->
-            SynPatRcd.Named { Pattern = pattern.ToRcd; Id = id; IsThis = isThis; Access = access; Range = range }
-        | SynPat.Typed(pattern, typ, range) ->
-            SynPatRcd.Typed { Pattern = pattern.ToRcd; Type = typ; Range = range }
-        | SynPat.Attrib(pattern, attributes, range) ->
-            SynPatRcd.Attrib { Pattern = pattern.ToRcd; Attributes = attributes; Range = range }
-//        | SynPat.Or
-//        | SynPat.Ands
-        | SynPat.LongIdent(id, _, _, args, access, range) ->
-            SynPatRcd.LongIdent { Id = id; Args = args; Access = access; Range = range }
-        | SynPat.Tuple(patterns, range) ->
-            SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
-        | SynPat.Paren(pattern, range) ->
-            SynPatRcd.Paren { Pattern = pattern.ToRcd; Range = range }
-//        | SynPat.ArrayOrList
-//        | SynPat.Record
-        | SynPat.Null range -> 
-            SynPatRcd.Null { Range = range }
-//        | SynPat.OptionalVal
-//        | SynPat.IsInst
-//        | SynPat.QuoteExpr
-//        | SynPat.DeprecatedCharRange
-//        | SynPat.InstanceMember
-//        | SynPat.FromParseError
-        | _ -> failwithf "SynPat.ToRcd not implemented for %A" x
+type ParsedInput with
+    static member CreateImplFile (implFile: ParsedImplFileInputRcd) =
+        ParsedInput.ImplFile implFile.FromRcd
 
-type SynBindingReturnInfoRcd = {
-    Type: SynType
-    Range: range
-    Attributes: SynAttributes
-    }
-with
-    member x.FromRcd = SynBindingReturnInfo(x.Type, x.Range, x.Attributes)
+type SynTypeDefnSimpleReprEnumRcd with
+    static member Create (cases: SynEnumCaseRcd list) =
+        { Cases = cases |> List.map (fun c -> c.FromRcd)
+          Range = range.Zero }
 
-type SynBindingReturnInfo with
-    member x.ToRcd =
-        let (SynBindingReturnInfo(typ, range, attributes)) = x
-        { Type = typ; Range = range; Attributes = attributes }
+type SynTypeDefnSimpleReprRecordRcd with
+    static member Create (fields: SynFieldRcd list) = 
+        { Access = None
+          Fields = (fields |> List.map (fun f -> f.FromRcd))
+          Range = range.Zero }
+        
+type SynTypeDefnSimpleReprUnionRcd with
+    static member Create cases =
+        { Access = None; Cases = cases; Range = range.Zero }
+            
+    static member Create (fields: SynUnionCaseRcd list) : SynTypeDefnSimpleReprUnionRcd= 
+        { Access = None
+          Cases = fields |> List.map (fun f -> f.FromRcd)
+          Range = range.Zero }
 
-type SynBindingRcd = {
-    Access: SynAccess option
-    Kind: SynBindingKind
-    IsInline: bool
-    IsMutable: bool
-    Attributes: SynAttributes
-    XmlDoc: PreXmlDoc
-    ValData: SynValData
-    Pattern: SynPatRcd
-    ReturnInfo: SynBindingReturnInfoRcd option
-    Expr: SynExpr
-    Range: range
-    Bind: SequencePointInfoForBinding }
-with
-    member x.FromRcd =
-        Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
+type SynUnionCaseRcd with 
+    static member Create(id, typ) : SynUnionCaseRcd =
+        { Attributes = SynAttributes.Empty
+          Id = id
+          Type = typ
+          XmlDoc = PreXmlDoc.Empty
+          Access = None
+          Range = range.Zero }
+          
+type SynUnionCaseType with
+    static member Create(synFieldList : SynFieldRcd list) =
+        SynUnionCaseType.UnionCaseFields(synFieldList |> List.map (fun sf -> sf.FromRcd ))
 
-type SynBinding with
-    member x.ToRcd =
-        let (Binding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
-        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo |> Option.map (fun ri -> ri.ToRcd); Expr = rhsExpr; Range = mBind; Bind = spBind }
+type SynEnumCaseRcd with
+    static member Create (id, cnst) =
+        {   Attributes = SynAttributes.Empty
+            Id = id
+            Constant = cnst
+            XmlDoc = PreXmlDoc.Empty
+            Range = range.Zero
+        }
 
-[<RequireQualifiedAccess>]
-type SynTypeDefnSimpleReprRcd =
-    | Union of SynTypeDefnSimpleReprUnionRcd
-    | Enum of SynTypeDefnSimpleReprEnumRcd
-    | Record of SynTypeDefnSimpleReprRecordRcd
-    | General of SynTypeDefnSimpleReprGeneralRcd
-    | LibraryOnlyILAssembly of SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd
-    | TypeAbbrev of SynTypeDefnSimpleReprTypeAbbrevRcd
-    | None of SynTypeDefnSimpleReprNoneRcd
-
-and SynTypeDefnSimpleReprUnionRcd = {
-    Access: SynAccess option
-    Cases: SynUnionCases
-    Range: range }
-
-and SynTypeDefnSimpleReprEnumRcd = {
-    Cases: SynEnumCases
-    Range: range }
-
-and  SynTypeDefnSimpleReprRecordRcd = {
-    Access: SynAccess option
-    Fields: SynFields
-    Range: range }
-
-and SynTypeDefnSimpleReprGeneralRcd = {
-    Kind: SynTypeDefnKind
-    // TODO incomplete
-    // (SynType * range * Ident option) list
-    // (SynValSig * MemberFlags) list
-    // SynField list
-    // bool
-    // bool
-    // SynSimplePat list option
-    Range: range }
-
-and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd = {
-    ILType: Microsoft.FSharp.Compiler.AbstractIL.IL.ILType
-    Range: range }
-
-and SynTypeDefnSimpleReprTypeAbbrevRcd = {
-    ParseDetail: Microsoft.FSharp.Compiler.Ast.ParserDetail
-    Type: SynType
-    Range: range }
-
-and SynTypeDefnSimpleReprNoneRcd = {
-    Range: range }
-
-type SynTypeDefnSimpleReprRcd with
-    member x.FromRcd =
-        match x with
-        | Union u -> u.FromRcd
-        | Enum e -> e.FromRcd
-        | Record r -> r.FromRcd
-        | General g -> g.FromRcd
-        | LibraryOnlyILAssembly a -> a.FromRcd
-        | TypeAbbrev a -> a.FromRcd
-        | None n -> n.FromRcd
-and SynTypeDefnSimpleReprUnionRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.Union(x.Access, x.Cases, x.Range)
-and SynTypeDefnSimpleReprEnumRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.Enum(x.Cases, x.Range)
-and SynTypeDefnSimpleReprRecordRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.Record(x.Access, x.Fields, x.Range)
-and SynTypeDefnSimpleReprGeneralRcd with
-    member x.FromRcd =  SynTypeDefnSimpleRepr.General(x.Kind, [], [], [], false, false, Option.None, x.Range) // TODO
-and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(x.ILType, x.Range)
-and SynTypeDefnSimpleReprTypeAbbrevRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.TypeAbbrev(x.ParseDetail, x.Type, x.Range)
-and SynTypeDefnSimpleReprNoneRcd with
-    member x.FromRcd = SynTypeDefnSimpleRepr.None(x.Range)
-
-type SynTypeDefnSimpleRepr with
-    member x.ToRcd =
-        match x with
-        | SynTypeDefnSimpleRepr.Union(access, cases, range) ->
-            SynTypeDefnSimpleReprRcd.Union { Access = access; Cases = cases; Range = range }
-        | SynTypeDefnSimpleRepr.Enum(cases, range) ->
-            SynTypeDefnSimpleReprRcd.Enum { Cases = cases; Range = range }
-        | SynTypeDefnSimpleRepr.Record(access, fields, range) ->
-            SynTypeDefnSimpleReprRcd.Record { Access = access; Fields = fields; Range = range }
-        | SynTypeDefnSimpleRepr.General(kind, _, _, _, _ , _, _, range) -> // TODO
-            SynTypeDefnSimpleReprRcd.General { Kind = kind; Range = range }
-        | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(iltype, range) ->
-            SynTypeDefnSimpleReprRcd.LibraryOnlyILAssembly { ILType = iltype; Range = range }
-        | SynTypeDefnSimpleRepr.TypeAbbrev(parseDetail, typ, range) ->
-            SynTypeDefnSimpleReprRcd.TypeAbbrev { ParseDetail = parseDetail; Type = typ; Range = range }
-        | SynTypeDefnSimpleRepr.None(range) ->
-            SynTypeDefnSimpleReprRcd.None { Range = range }
-        | SynTypeDefnSimpleRepr.Exception _ -> failwith "not supported"
-
-type SynEnumCaseRcd = {
-    Attributes: SynAttributes
-    Id: Ident 
-    Constant: SynConst
-    XmlDoc: PreXmlDoc
-    Range: range }
-with
-    member x.FromRcd =
-        SynEnumCase.EnumCase(x.Attributes, x.Id, x.Constant, x.XmlDoc, x.Range)
-
-type SynEnumCase with
-    member x.ToRcd =
-        match x with
-        | EnumCase(attributes, id, constant, xmlDoc, range) ->
-            { Attributes = attributes; Id = id; Constant = constant; XmlDoc = xmlDoc; Range = range }
-    
-type XmlDoc with
-    member x.Lines =
-        match x with
-        | XmlDoc lines -> lines
+type SynFieldRcd with
+    static member Create(id, typ, ?isMutable) : SynFieldRcd =
+        let isMutable = defaultArg isMutable false
+        {   Attributes = SynAttributes.Empty
+            IsStatic = false
+            Id = Some id
+            Type = typ
+            IsMutable = isMutable
+            XmlDoc = PreXmlDoc.Empty
+            Access = None
+            Range = range.Zero 
+        }
+    static member Create(id, typ) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent typ)
+    static member CreateInt(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int") 
+    static member CreateString(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string")
+    static member CreateApp id typ args =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateApp(SynType.CreateLongIdent typ, args |> List.map (SynType.CreateLongIdent)))
 
 type PreXmlDoc with
-    member x.Lines  =
-        x.ToXmlDoc().Lines
-
-
-type SynUnionCaseRcd = {
-    Attributes: SynAttributes
-    Id: Ident
-    Type: SynUnionCaseType
-    XmlDoc: PreXmlDoc
-    Access: SynAccess option
-    Range: range }
-with
-    member x.FromRcd =
-        SynUnionCase.UnionCase(x.Attributes, x.Id, x.Type, x.XmlDoc, x.Access, x.Range)
-        
-type SynUnionCase with
-    member x.ToRcd : SynUnionCaseRcd =
-        match x with
-        | SynUnionCase.UnionCase(attributes, id, typ, xmlDoc, access, range) ->
-            { Attributes = attributes; Id = id; Type = typ; XmlDoc = xmlDoc; Access = access; Range = range }
-
-type SynFieldRcd = {
-    Attributes: SynAttributes
-    IsStatic: bool
-    Id: Ident option
-    Type: SynType
-    IsMutable: bool
-    XmlDoc: PreXmlDoc
-    Access: SynAccess option
-    Range: range }
-with
-    member x.FromRcd =
-        SynField.Field(x.Attributes, x.IsStatic, x.Id, x.Type, x.IsMutable, x.XmlDoc, x.Access, x.Range)
-
-type SynField with
-    member x.ToRcd: SynFieldRcd =
-        match x with
-        | SynField.Field(attributes, isstatic, id, typ, ismutable, xmlDoc, access, range) ->
-             { Attributes = attributes
-               IsStatic = isstatic
-               Id = id
-               Type = typ
-               IsMutable = ismutable
-               XmlDoc = xmlDoc
-               Access = access
-               Range = range }
-    
+    static member Create lines =
+        let dc = XmlDocCollector()
+        let mutable i = 0
+        for line in lines do
+            let p = mkPos i 0
+            dc.AddXmlDocLine(line, p)
+            i <- i + 1
+        PreXmlDoc.CreateFromGrabPoint(dc, mkPos i 0)
