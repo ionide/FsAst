@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module FsAst.AstCreate
 open System
 open Microsoft.FSharp.Compiler.Ast
@@ -111,7 +111,6 @@ type SynPatRcd with
 type SynValInfo with
     static member Empty =
         SynValInfo([], SynArgInfo.Empty)
-        
 
 type SynBindingReturnInfoRcd with
     static member Create typ =
@@ -184,7 +183,7 @@ type SynModuleDecl with
     static member CreateType (info, members) =
         SynModuleDecl.Types([SynTypeDefnRcd.Create(info, members).FromRcd], range.Zero)
     static member CreateSimpleType (info, simple: SynTypeDefnSimpleReprRcd, ?members) =
-        SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members ).FromRcd], range.Zero)
+        SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members).FromRcd], range.Zero)
     static member CreateOpen id =
         SynModuleDecl.Open(id, range.Zero)
     static member CreateLet (bindings: SynBindingRcd list) =
@@ -193,7 +192,7 @@ type SynModuleDecl with
             { SynAttribute.TypeName = ident
               SynAttribute.ArgExpr = expr
               SynAttribute.Target = target
-              SynAttribute.AppliesToGetterAndSetter= isProp
+              SynAttribute.AppliesToGetterAndSetter = isProp
               SynAttribute.Range = range.Zero }
     static member CreateAttributes(attributes) =
         SynModuleDecl.Attributes(attributes, range.Zero)
@@ -243,19 +242,38 @@ type ParsedInput with
     static member CreateImplFile (implFile: ParsedImplFileInputRcd) =
         ParsedInput.ImplFile implFile.FromRcd
 
-type SynTypeDefnSimpleReprUnionRcd with
-    static member Create cases = // TODO SynUnionCaseRcd list
-        { Access = None; Cases = cases; Range = range.Zero }
-
 type SynTypeDefnSimpleReprEnumRcd with
     static member Create (cases: SynEnumCaseRcd list) =
-        { Cases = (cases |> List.map (fun c -> c.FromRcd)); Range = range.Zero }
+        { Cases = cases |> List.map (fun c -> c.FromRcd)
+          Range = range.Zero }
 
 type SynTypeDefnSimpleReprRecordRcd with
     static member Create (fields: SynFieldRcd list) = 
-        { Access = None; Fields = (fields |> List.map (fun f -> f.FromRcd)); Range = range.Zero }
+        { Access = None
+          Fields = (fields |> List.map (fun f -> f.FromRcd))
+          Range = range.Zero }
+        
+type SynTypeDefnSimpleReprUnionRcd with
+    static member Create cases =
+        { Access = None; Cases = cases; Range = range.Zero }
+            
+    static member Create (fields: SynUnionCaseRcd list) : SynTypeDefnSimpleReprUnionRcd= 
+        { Access = None
+          Cases = fields |> List.map (fun f -> f.FromRcd)
+          Range = range.Zero }
 
-//type SynUnionCase with // TODO
+type SynUnionCaseRcd with 
+    static member Create(id, typ) : SynUnionCaseRcd =
+        { Attributes = SynAttributes.Empty
+          Id = id
+          Type = typ
+          XmlDoc = PreXmlDoc.Empty
+          Access = None
+          Range = range.Zero }
+          
+type SynUnionCaseType with
+    static member Create(synFieldList : SynFieldRcd list) =
+        SynUnionCaseType.UnionCaseFields(synFieldList |> List.map (fun sf -> sf.FromRcd ))
 
 type SynEnumCaseRcd with
     static member Create (id, cnst) =
