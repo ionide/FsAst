@@ -196,8 +196,8 @@ type SynModuleDecl with
               SynAttribute.Range = range.Zero }
     static member CreateAttributes(attributes) =
         SynModuleDecl.Attributes(attributes, range.Zero)
-    static member CreateNestedModule(info, members) =
-        SynModuleDecl.NestedModule(info, false, members, false, range.Zero)
+    static member CreateNestedModule(info : SynComponentInfoRcd, members) =
+        SynModuleDecl.NestedModule(info.FromRcd, false, members, false, range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =
