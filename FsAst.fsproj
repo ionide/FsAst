@@ -1,19 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <Description>Helpers for the F# Abstract Syntax Tree</Description>
+    <Owners>Cameron Taggart</Owners>
+    <Authors>Cameron Taggart, Dave Thomas</Authors>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageTags>f#, ast</PackageTags>
+
+    <!-- SourceLink related properties https://github.com/dotnet/SourceLink#using-sourcelink -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <Compile Include="printfn.fs" />
     <Compile Include="AstRcd.fs" />
     <Compile Include="AstCreate.fs" />
     <Compile Include="PrintAstInfo.fs" />
     <Compile Include="FormatFs.fs" />
     <Compile Include="CreateAst.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
-  <Import Project=".paket\Paket.Restore.targets" />
+  <ItemGroup>
+    <PackageReference Include="Fantomas" Version="2.8.1" />
+  </ItemGroup>
 </Project>
