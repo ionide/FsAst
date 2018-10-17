@@ -21,6 +21,6 @@
     <Compile Include="CreateAst.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fantomas" Version="2.8.1" />
+    <PackageReference Include="Fantomas" Version="2.9.0" />
   </ItemGroup>
 </Project>
