@@ -6,12 +6,15 @@
     <Owners>Cameron Taggart</Owners>
     <Authors>Cameron Taggart, Dave Thomas</Authors>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
-    <PackageTags>f#, ast</PackageTags>
+    <PackageTags>f#;ast</PackageTags>
+    <PackageProjectUrl>https://github.com/ctaggart/FsAst/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ctaggart/FsAst.git</RepositoryUrl>
 
     <!-- SourceLink related properties https://github.com/dotnet/SourceLink#using-sourcelink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <NoWarn>$(NoWarn);FS2003</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AstRcd.fs" />
@@ -23,5 +26,6 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.3.4" />
     <PackageReference Include="Fantomas" Version="2.9.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
   </ItemGroup>
 </Project>
