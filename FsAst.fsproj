@@ -6,7 +6,7 @@
     <Owners>Cameron Taggart</Owners>
     <Authors>Cameron Taggart, Dave Thomas</Authors>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
-    <PackageTags>f#, ast</PackageTags>
+    <PackageTags>f#;ast</PackageTags>
 
     <!-- SourceLink related properties https://github.com/dotnet/SourceLink#using-sourcelink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
