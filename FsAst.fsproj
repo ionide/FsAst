@@ -21,6 +21,7 @@
     <Compile Include="CreateAst.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.3.4" />
     <PackageReference Include="Fantomas" Version="2.9.0" />
   </ItemGroup>
 </Project>
