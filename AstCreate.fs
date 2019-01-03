@@ -186,6 +186,8 @@ type SynModuleDecl with
         SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members).FromRcd], range.Zero)
     static member CreateOpen id =
         SynModuleDecl.Open(id, range.Zero)
+    static member CreateHashDirective (directive, values) =
+        SynModuleDecl.HashDirective (ParsedHashDirective (directive, values, range.Zero), range.Zero)
     static member CreateLet (bindings: SynBindingRcd list) =
         SynModuleDecl.Let(false, bindings |> List.map(fun b -> b.FromRcd), range.Zero)
     static member CreateAttribute(ident, expr, isProp, ?target) =
