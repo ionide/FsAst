@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-
     <Description>Helpers for the F# Abstract Syntax Tree</Description>
     <Owners>Cameron Taggart</Owners>
     <Authors>Cameron Taggart, Dave Thomas</Authors>
@@ -9,7 +9,6 @@
     <PackageTags>f#;ast</PackageTags>
     <PackageProjectUrl>https://github.com/ctaggart/FsAst/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ctaggart/FsAst.git</RepositoryUrl>
-
     <!-- SourceLink related properties https://github.com/dotnet/SourceLink#using-sourcelink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -22,9 +21,5 @@
     <Compile Include="PrintAstInfo.fs" />
     <Compile Include="FormatFs.fs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
-    <PackageReference Include="Fantomas" Version="3.3.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
