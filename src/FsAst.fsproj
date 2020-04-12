@@ -21,7 +21,6 @@
     <Compile Include="AstCreate.fs" />
     <Compile Include="PrintAstInfo.fs" />
     <Compile Include="FormatFs.fs" />
-    <Compile Include="CreateAst.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.0" />

@@ -3,19 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsAst", "FsAst.fsproj", "{CBF173CF-8C97-4869-A40D-20DEA1DBCC1E}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5673E2E5-48B3-45DC-A6BC-56A400EFD2EA}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		Enum.fs = Enum.fs
-		Hello.fs = Hello.fs
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
-		PInvoke.fs = PInvoke.fs
 		readme.md = readme.md
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "sample", "sample\sample.fsproj", "{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsAst", "src\FsAst.fsproj", "{057534D9-199F-4231-84C8-AE658D10B834}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +22,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CBF173CF-8C97-4869-A40D-20DEA1DBCC1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CBF173CF-8C97-4869-A40D-20DEA1DBCC1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CBF173CF-8C97-4869-A40D-20DEA1DBCC1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CBF173CF-8C97-4869-A40D-20DEA1DBCC1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{057534D9-199F-4231-84C8-AE658D10B834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{057534D9-199F-4231-84C8-AE658D10B834}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{057534D9-199F-4231-84C8-AE658D10B834}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{057534D9-199F-4231-84C8-AE658D10B834}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

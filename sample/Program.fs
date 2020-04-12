@@ -2,7 +2,7 @@
 
 [<EntryPoint>]
 let main argv =
-    
+
     let fs =
        __SOURCE_DIRECTORY__ +
         @"/Hello.fs"
