@@ -13,14 +13,18 @@ FsAst is part of Ionide tooling suite - You can support its development on [Open
 
 ## Useful links
 
-* Original blog post about the project by @ctaggart - http://blog.ctaggart.com/2014/09/generating-f-code-using-its-ast.html
-* Applied Meta-Programming with Myriad and Falanax by @7sharp9 - https://7sharp9.dev/2019/04/24/2019-04-24-applied-metaprogramming-with-myriad/
+* Original blog post about the project by [@ctaggart](https://github.com/ctaggart) - http://blog.ctaggart.com/2014/09/generating-f-code-using-its-ast.html
+* Applied Meta-Programming with Myriad and Falanax by [@7sharp9](https://github.com/7sharp9)  - https://7sharp9.dev/2019/04/24/2019-04-24-applied-metaprogramming-with-myriad/
 
 ## Build process
 
  * You need [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/) - check the exact version in [global.json](global.json)
  * Run `dotnet tool restore` to restore the .NET Core 3 local tools defined at .config/dotnet-tools.json
  * To build the project run `dotnet build`
+
+## Special thanks
+
+* [@ctaggart](https://github.com/ctaggart) - Original creator and maintainer of the FsAst.
 
 
 ## How to contribute
