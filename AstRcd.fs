@@ -2,10 +2,10 @@
 module FsAst.AstRcd
 
 open System
-open Microsoft.FSharp.Compiler.Ast
-open Microsoft.FSharp.Compiler.Range
+open FSharp.Compiler.Range
+open FSharp.Compiler.Ast
 
-type ParsedImplFileInputRcd = { 
+type ParsedImplFileInputRcd = {
     File: string
     IsScript: bool
     QualName: QualifiedNameOfFile
@@ -26,7 +26,7 @@ type ParsedImplFileInput with
 type SynModuleOrNamespaceRcd = {
     Id: LongIdent
     IsRecursive: bool
-    IsModule: bool
+    Kind: SynModuleOrNamespaceKind
     Declarations: SynModuleDecls
     XmlDoc: PreXmlDoc
     Attributes: SynAttributes
@@ -34,12 +34,12 @@ type SynModuleOrNamespaceRcd = {
     Range: range }
 with
     member x.FromRcd =
-        SynModuleOrNamespace(x.Id, x.IsRecursive, x.IsModule, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
+        SynModuleOrNamespace(x.Id, x.IsRecursive, x.Kind, x.Declarations, x.XmlDoc, x.Attributes, x.Access, x.Range)
 
 type SynModuleOrNamespace with
     member x.ToRcd =
-        let (SynModuleOrNamespace(id, isRecursive, isModule, declarations, xmlDoc, attributes, access, range)) = x
-        { Id = id; IsRecursive = isRecursive; IsModule = isModule; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
+        let (SynModuleOrNamespace(id, isRecursive, kind, declarations, xmlDoc, attributes, access, range)) = x
+        { Id = id; IsRecursive = isRecursive; Kind = kind; Declarations = declarations; XmlDoc = xmlDoc; Attributes = attributes; Access = access; Range = range }
 
 type SynComponentInfoRcd = {
     Attributes: SynAttributes
@@ -85,14 +85,14 @@ type SynTypeDefnReprSimpleRcd = {
     Repr: SynTypeDefnSimpleRepr
     Range: range }
 with
-    member x.FromRcd = 
+    member x.FromRcd =
         SynTypeDefnRepr.Simple(x.Repr, x.Range)
 
 [<RequireQualifiedAccess>]
 type SynTypeDefnReprRcd =
     | ObjectModel of SynTypeDefnReprObjectModelRcd
     | Simple of SynTypeDefnReprSimpleRcd
-with 
+with
     member x.FromRcd =
         match x with
         | ObjectModel om -> om.FromRcd
@@ -171,7 +171,7 @@ and SynPatParenRcd = {
 and SynPatNullRcd = {
     Range: range }
 
-type SynPatRcd  with 
+type SynPatRcd  with
     member x.FromRcd =
         match x with
         | Const c -> c.FromRcd
@@ -196,7 +196,7 @@ and SynPatAttribRcd with
 and SynPatLongIdentRcd with
     member x.FromRcd = SynPat.LongIdent(x.Id, None, None, x.Args, None, x.Range)
 and SynPatTupleRcd with
-    member x.FromRcd = SynPat.Tuple(x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
+    member x.FromRcd = SynPat.Tuple(false, x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
 and SynPatParenRcd with
     member x.FromRcd = SynPat.Paren(x.Pattern.FromRcd, x.Range)
 and SynPatNullRcd with
@@ -219,13 +219,13 @@ type SynPat with
 //        | SynPat.Ands
         | SynPat.LongIdent(id, _, _, args, access, range) ->
             SynPatRcd.LongIdent { Id = id; Args = args; Access = access; Range = range }
-        | SynPat.Tuple(patterns, range) ->
+        | SynPat.Tuple(_, patterns, range) ->
             SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
         | SynPat.Paren(pattern, range) ->
             SynPatRcd.Paren { Pattern = pattern.ToRcd; Range = range }
 //        | SynPat.ArrayOrList
 //        | SynPat.Record
-        | SynPat.Null range -> 
+        | SynPat.Null range ->
             SynPatRcd.Null { Range = range }
 //        | SynPat.OptionalVal
 //        | SynPat.IsInst
@@ -306,11 +306,11 @@ and SynTypeDefnSimpleReprGeneralRcd = {
     Range: range }
 
 and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd = {
-    ILType: Microsoft.FSharp.Compiler.AbstractIL.IL.ILType
+    ILType: FSharp.Compiler.AbstractIL.IL.ILType
     Range: range }
 
 and SynTypeDefnSimpleReprTypeAbbrevRcd = {
-    ParseDetail: Microsoft.FSharp.Compiler.Ast.ParserDetail
+    ParseDetail: FSharp.Compiler.Ast.ParserDetail
     Type: SynType
     Range: range }
 
@@ -363,7 +363,7 @@ type SynTypeDefnSimpleRepr with
 
 type SynEnumCaseRcd = {
     Attributes: SynAttributes
-    Id: Ident 
+    Id: Ident
     Constant: SynConst
     XmlDoc: PreXmlDoc
     Range: range }
@@ -376,7 +376,7 @@ type SynEnumCase with
         match x with
         | EnumCase(attributes, id, constant, xmlDoc, range) ->
             { Attributes = attributes; Id = id; Constant = constant; XmlDoc = xmlDoc; Range = range }
-    
+
 type XmlDoc with
     member x.Lines =
         match x with
@@ -397,7 +397,7 @@ type SynUnionCaseRcd = {
 with
     member x.FromRcd =
         SynUnionCase.UnionCase(x.Attributes, x.Id, x.Type, x.XmlDoc, x.Access, x.Range)
-        
+
 type SynUnionCase with
     member x.ToRcd : SynUnionCaseRcd =
         match x with
@@ -429,4 +429,4 @@ type SynField with
                XmlDoc = xmlDoc
                Access = access
                Range = range }
-    
+
