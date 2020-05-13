@@ -16,10 +16,10 @@ type LongIdentWithDots with
     static member CreateString (text: string) =
         LongIdentWithDots(Ident.CreateLong text, [])
     static member CreateFromLongIdent (longIdent: LongIdent) =
-        longIdent |> List.map (fun i -> i.idText)
+        LongIdentWithDots(longIdent, [])
 
     member x.AsString =
-        let sb = System.Text.StringBuilder()
+        let sb = Text.StringBuilder()
         for i in 0 .. x.Lid.Length - 2 do
             sb.Append x.Lid.[i].idText |> ignore
             sb.Append '.' |> ignore
@@ -87,6 +87,13 @@ type SynExpr with
         SynExpr.Tuple(false, list, [], range.Zero)
     static member CreateNull =
         SynExpr.Null(range.Zero)
+    static member CreateRecord (fields: list<RecordFieldName * option<SynExpr>>) =
+        let fields = fields |> List.map (fun (rfn, synExpr) -> (rfn, synExpr, None))
+        SynExpr.Record(None, None, fields, range.Zero )
+    static member CreateRecordUpdate (copyInfo: SynExpr, fieldUpdates ) =
+        let blockSep = (range.Zero, None) : BlockSeparator
+        let copyInfo = Some (copyInfo, blockSep)
+        SynExpr.Record (None, copyInfo, fieldUpdates, range.Zero)
 
 type SynType with
     static member CreateApp (typ, args, ?isPostfix) =
@@ -97,6 +104,8 @@ type SynType with
         SynType.CreateLongIdent(LongIdentWithDots.CreateString s)
     static member CreateUnit =
         SynType.CreateLongIdent("unit")
+    static member CreateFun (fieldTypeIn, fieldTypeOut) = 
+        SynType.Fun (fieldTypeIn, fieldTypeOut, range.Zero)
 
 type SynArgInfo with
     static member Empty =
