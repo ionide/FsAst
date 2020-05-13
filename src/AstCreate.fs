@@ -15,6 +15,8 @@ type LongIdentWithDots with
         LongIdentWithDots(texts |> List.map Ident.Create, [])
     static member CreateString (text: string) =
         LongIdentWithDots(Ident.CreateLong text, [])
+    static member CreateFromLongIdent (longIdent: LongIdent) =
+        (longIdent |> List.map (fun i -> i.idText))
 
     member x.AsString =
         let sb = System.Text.StringBuilder()
