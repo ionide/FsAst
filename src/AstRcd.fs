@@ -397,6 +397,10 @@ type SynUnionCaseRcd = {
 with
     member x.FromRcd =
         SynUnionCase.UnionCase(x.Attributes, x.Id, x.Type, x.XmlDoc, x.Access, x.Range)
+    member x.HasFields =
+        match x.Type with
+        | UnionCaseFields cases -> not cases.IsEmpty
+        | _ -> false
 
 type SynUnionCase with
     member x.ToRcd : SynUnionCaseRcd =
