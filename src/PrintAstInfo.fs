@@ -3,7 +3,7 @@ module FsAst.PrintAstInfo
 
 open System.IO
 open Fantomas
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.SourceCodeServices
 
 let rec printType indent typ =
@@ -48,11 +48,11 @@ let rec printPattern indent pat =
         printfn "%*sPat LongIdent: %s" indent "" id.AsString
 //        printfn "%*s  decls: %A" indent "" decls
         match cnstrArgs with
-        | SynConstructorArgs.Pats pats ->
+        | SynArgPats.Pats pats ->
             printfn "%*s  cnstrArgs, %d pats" indent "" pats.Length
             for p in pats do
                 printPattern (indent+4) p
-        | SynConstructorArgs.NamePatPairs (namedPats, _) ->
+        | SynArgPats.NamePatPairs (namedPats, _) ->
             printfn "%*s  cnstrArgs, %d namedPats" indent "" namedPats.Length
             for id, p in namedPats do
                 printfn "%*s  id: %s" indent "" id.idText

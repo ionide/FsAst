@@ -3,7 +3,8 @@ module FsAst.AstRcd
 
 open System
 open FSharp.Compiler.Range
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.XmlDoc
 
 type ParsedImplFileInputRcd = {
     File: string
@@ -27,7 +28,7 @@ type SynModuleOrNamespaceRcd = {
     Id: LongIdent
     IsRecursive: bool
     Kind: SynModuleOrNamespaceKind
-    Declarations: SynModuleDecls
+    Declarations: SynModuleDecl list
     XmlDoc: PreXmlDoc
     Attributes: SynAttributes
     Access: SynAccess option
@@ -156,7 +157,7 @@ and SynPatAttribRcd = {
 
 and SynPatLongIdentRcd = {
     Id: LongIdentWithDots
-    Args: SynConstructorArgs
+    Args: SynArgPats
     Access: SynAccess option
     Range: range }
 
@@ -260,7 +261,7 @@ type SynBindingRcd = {
     ReturnInfo: SynBindingReturnInfoRcd option
     Expr: SynExpr
     Range: range
-    Bind: SequencePointInfoForBinding }
+    Bind: DebugPointForBinding }
 with
     member x.FromRcd =
         Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
@@ -282,16 +283,16 @@ type SynTypeDefnSimpleReprRcd =
 
 and SynTypeDefnSimpleReprUnionRcd = {
     Access: SynAccess option
-    Cases: SynUnionCases
+    Cases: SynUnionCase list
     Range: range }
 
 and SynTypeDefnSimpleReprEnumRcd = {
-    Cases: SynEnumCases
+    Cases: SynEnumCase list
     Range: range }
 
 and  SynTypeDefnSimpleReprRecordRcd = {
     Access: SynAccess option
-    Fields: SynFields
+    Fields: SynField list
     Range: range }
 
 and SynTypeDefnSimpleReprGeneralRcd = {
@@ -310,7 +311,7 @@ and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd = {
     Range: range }
 
 and SynTypeDefnSimpleReprTypeAbbrevRcd = {
-    ParseDetail: FSharp.Compiler.Ast.ParserDetail
+    ParseDetail: FSharp.Compiler.SyntaxTree.ParserDetail
     Type: SynType
     Range: range }
 

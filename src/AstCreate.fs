@@ -1,8 +1,9 @@
 [<AutoOpen>]
 module FsAst.AstCreate
 open System
-open FSharp.Compiler.Ast
-open FSharp.Compiler.Range 
+open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Range
+open FSharp.Compiler.XmlDoc
 
 type Ident with
     static member Create text =
@@ -30,13 +31,13 @@ type SynPatLongIdentRcd with
     static member Create (id, args) =
         { Id = id; Args = args; Access = None; Range = range.Zero }
 
-type SynConstructorArgs with
+type SynArgPats with
     static member Empty =
-        SynConstructorArgs.Pats[]
+        SynArgPats.Pats[]
 
 type SynPatRcd with
     static member CreateLongIdent (id, args: SynPatRcd list) =
-        SynPatRcd.LongIdent (SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynConstructorArgs.Pats ))
+        SynPatRcd.LongIdent (SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynArgPats.Pats ))
     static member CreateTuple patterns =
         SynPatRcd.Tuple { Patterns = patterns; Range = range.Zero }
     static member CreateParen pattern =
@@ -104,7 +105,7 @@ type SynType with
         SynType.CreateLongIdent(LongIdentWithDots.CreateString s)
     static member CreateUnit =
         SynType.CreateLongIdent("unit")
-    static member CreateFun (fieldTypeIn, fieldTypeOut) = 
+    static member CreateFun (fieldTypeIn, fieldTypeOut) =
         SynType.Fun (fieldTypeIn, fieldTypeOut, range.Zero)
 
 type SynArgInfo with
@@ -140,7 +141,7 @@ type SynBindingRcd with
             ReturnInfo = None
             Expr = SynExpr.Null range.Zero
             Range = range.Zero
-            Bind = SequencePointInfoForBinding.NoSequencePointAtInvisibleBinding
+            Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
         }
     static member Let =
         { SynBindingRcd.Null with
@@ -217,7 +218,7 @@ type SynModuleOrNamespaceRcd with
         {   Id = id
             IsRecursive = false
             Kind = SynModuleOrNamespaceKind.NamedModule
-            Declarations = [] 
+            Declarations = []
             XmlDoc = PreXmlDoc.Empty
             Attributes = SynAttributes.Empty
             Access = None
