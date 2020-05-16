@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Helpers for the F# Abstract Syntax Tree</Description>
-    <Owners>Cameron Taggart</Owners>
-    <Authors>Cameron Taggart, Dave Thomas</Authors>
+    <Owners>Cameron Taggart, Krzysztof Cieslak</Owners>
+    <Authors>Cameron Taggart, Dave Thomas, Krzysztof Cieslak</Authors>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageTags>f#;ast</PackageTags>
-    <PackageProjectUrl>https://github.com/ctaggart/FsAst/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/ctaggart/FsAst.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Ionide/FsAst/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ionide/FsAst.git</RepositoryUrl>
     <!-- SourceLink related properties https://github.com/dotnet/SourceLink#using-sourcelink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
