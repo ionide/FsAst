@@ -1,6 +1,6 @@
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    Fantomas (4.0.0-alpha-005)
+    Fantomas (4.0.0-alpha-006)
       FSharp.Compiler.Service (>= 35.0) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.7.1) - restriction: >= netstandard2.0
     FSharp.Compiler.Service (35.0)
