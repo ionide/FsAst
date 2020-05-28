@@ -333,7 +333,7 @@ type SynFieldRcd with
     static member CreateDecimal(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal")
     static member CreateDecimalOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal")
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal option")
     static member CreateApp id typ args =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateApp(SynType.CreateLongIdent typ, args |> List.map (SynType.CreateLongIdent)))
 
