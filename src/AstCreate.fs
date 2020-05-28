@@ -316,10 +316,112 @@ type SynFieldRcd with
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent typ)
     static member CreateInt(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int")
+    static member CreateIntOption(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int option")
     static member CreateString(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string")
+    static member CreateStringOption(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string option")
+    static member CreateFloat(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "float")
+    static member CreateFloatOption(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "float option")
+    static member CreateBool(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "bool")
+    static member CreateBoolOption(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "bool option")
+    static member CreateDecimal(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal")
+    static member CreateDecimalOption(id) =
+        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal")
     static member CreateApp id typ args =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateApp(SynType.CreateLongIdent typ, args |> List.map (SynType.CreateLongIdent)))
+
+type SynAttributeList with
+    static member Create(attrs) =
+        {
+            Attributes = attrs
+            Range = range0
+        }
+
+    static member Create(attr) =
+        {
+            Attributes = [ attr ]
+            Range = range0
+        }
+
+    static member Create([<ParamArray>] attrs) =
+        {
+            Attributes = List.ofArray attrs
+            Range = range0
+        }
+
+type SynAttribute with
+    static member Create(name: string) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (SynConst.Unit, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ Ident.Create name ], [ ])
+        }
+
+    static member Create(name: string, argument: string) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (SynConst.String(argument, range0), range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ Ident.Create name ], [ ])
+        }
+
+    static member Create(name: string, argument: bool) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (SynConst.Bool argument, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ Ident.Create name ], [ ])
+        }
+
+    static member Create(name: string, argument: int) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (SynConst.Int32 argument, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ Ident.Create name ], [ ])
+        }
+
+    static member Create(name: string, argument: SynConst) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (argument, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ Ident.Create name ], [ ])
+        }
+
+    static member Create(name: Ident, argument: SynConst) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (argument, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots([ name ], [ ])
+        }
+
+    static member Create(name: Ident list, argument: SynConst) : SynAttribute =
+        {
+           AppliesToGetterAndSetter = false
+           ArgExpr = SynExpr.Const (argument, range0)
+           Range = range0
+           Target = None
+           TypeName = LongIdentWithDots(name, [ ])
+        }
+
+    static member RequireQualifiedAccess() =
+        SynAttribute.Create("RequireQualifiedAccess")
 
 type PreXmlDoc with
     static member Create lines =
@@ -330,3 +432,9 @@ type PreXmlDoc with
             dc.AddXmlDocLine(line, p)
             i <- i + 1
         PreXmlDoc.CreateFromGrabPoint(dc, mkPos i 0)
+
+    static member Create (docs: string option) =
+        PreXmlDoc.Create [
+            if docs.IsSome
+            then docs.Value
+        ]
