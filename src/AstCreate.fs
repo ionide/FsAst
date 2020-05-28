@@ -317,23 +317,25 @@ type SynFieldRcd with
     static member CreateInt(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int")
     static member CreateIntOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "int option")
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ "int" ]) ]
     static member CreateString(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string")
     static member CreateStringOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "string option")
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ "string" ]) ]
     static member CreateFloat(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "float")
     static member CreateFloatOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "float option")
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ "float" ]) ]
     static member CreateBool(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "bool")
     static member CreateBoolOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "bool option")
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ "bool" ]) ]
     static member CreateDecimal(id) =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal")
     static member CreateDecimalOption(id) =
-        SynFieldRcd.Create(Ident.Create id, SynType.CreateLongIdent "decimal option")
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ "decimal" ]) ]
+    static member CreateOption(id, optional) =
+        SynFieldRcd.CreateApp id (LongIdentWithDots.Create [ "Option" ]) [ (LongIdentWithDots.Create [ optional ]) ]
     static member CreateApp id typ args =
         SynFieldRcd.Create(Ident.Create id, SynType.CreateApp(SynType.CreateLongIdent typ, args |> List.map (SynType.CreateLongIdent)))
 
