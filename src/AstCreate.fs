@@ -107,7 +107,89 @@ type SynType with
         SynType.CreateLongIdent("unit")
     static member CreateFun (fieldTypeIn, fieldTypeOut) =
         SynType.Fun (fieldTypeIn, fieldTypeOut, range.Zero)
+    
+    static member Create(name: string) = SynType.CreateLongIdent name
 
+    static member Option(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "Option",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+        
+    static member Option(inner: string) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "Option",
+            typeArgs=[ SynType.Create inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member Dictionary(key, value) =
+        SynType.App(
+            typeName=SynType.LongIdent(LongIdentWithDots.Create [ "System"; "Collections"; "Generic"; "Dictionary" ]),
+            typeArgs=[ key; value ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member List(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "list",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member List(inner: string) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "list",
+            typeArgs=[ SynType.Create inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member DateTimeOffset() =
+        SynType.LongIdent(LongIdentWithDots.Create [ "System"; "DateTimeOffset" ])
+
+    static member DateTime() =
+        SynType.LongIdent(LongIdentWithDots.Create [ "System"; "DateTime" ])
+
+    static member Int() =
+        SynType.Create "int"
+    
+    static member Int64() = 
+        SynType.Create "int64"
+
+    static member String() =
+        SynType.Create "string"
+
+    static member Bool() =
+        SynType.Create "bool"
+
+    static member Float() =
+        SynType.Create "float"
+
+    static member Decimal() =
+        SynType.Create "decimal"
+        
+    
 type SynArgInfo with
     static member Empty =
         SynArgInfo(SynAttributes.Empty, false, None)
