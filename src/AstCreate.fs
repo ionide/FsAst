@@ -82,10 +82,17 @@ type SynExpr with
         SynExpr.Ident(Ident.Create id)
     static member CreateLongIdent (isOptional, id, altNameRefCell) =
         SynExpr.LongIdent(isOptional, id, altNameRefCell, range.Zero)
+    static member CreateLongIdent id =
+        SynExpr.CreateLongIdent(false, id, None)
     static member CreateParen expr =
         SynExpr.Paren(expr, range.Zero, None, range.Zero)
     static member CreateTuple list =
         SynExpr.Tuple(false, list, [], range.Zero)
+    static member CreateParenedTuple list =
+        SynExpr.CreateTuple list
+        |> SynExpr.CreateParen
+    static member CreateUnit =
+        SynExpr.CreateConst SynConst.Unit
     static member CreateNull =
         SynExpr.Null(range.Zero)
     static member CreateRecord (fields: list<RecordFieldName * option<SynExpr>>) =
@@ -95,6 +102,49 @@ type SynExpr with
         let blockSep = (range.Zero, None) : BlockSeparator
         let copyInfo = Some (copyInfo, blockSep)
         SynExpr.Record (None, copyInfo, fieldUpdates, range.Zero)
+    /// Creates:
+    /// 
+    /// ```
+    /// match matchExpr with
+    /// | clause1
+    /// | clause2
+    /// ...
+    /// | clauseN
+    /// ```
+    static member CreateMatch(matchExpr, clauses) =
+        SynExpr.Match(DebugPointForBinding.DebugPointAtBinding range0, matchExpr, clauses, range0)
+    /// Creates : `instanceAndMethod(args)`
+    static member CreateInstanceMethodCall(instanceAndMethod : LongIdentWithDots, args) =
+        let valueExpr = SynExpr.CreateLongIdent instanceAndMethod
+        SynExpr.CreateApp(valueExpr, args)
+    /// Creates : `instanceAndMethod()`
+    static member CreateInstanceMethodCall(instanceAndMethod : LongIdentWithDots) =
+        SynExpr.CreateInstanceMethodCall(instanceAndMethod, SynExpr.CreateUnit)
+    /// Creates : `instanceAndMethod<type1, type2,... type}>(args)`
+    static member CreateInstanceMethodCall(instanceAndMethod : LongIdentWithDots, instanceMethodsGenericTypes, args) =
+        let valueExpr = SynExpr.CreateLongIdent instanceAndMethod
+        let valueExprWithType = SynExpr.TypeApp(valueExpr, range0, instanceMethodsGenericTypes, [], None, range0, range0 )
+        SynExpr.CreateApp(valueExprWithType, args)
+    /// Creates: expr1; expr2; ... exprN
+    static member CreateSequential exprs =
+        let seqExpr expr1 expr2 = SynExpr.Sequential(DebugPointAtSequential.Both, false, expr1, expr2, range0)
+        let rec inner exprs state =
+            match state, exprs with
+            | None, [] -> SynExpr.CreateConst SynConst.Unit
+            | Some expr, [] -> expr
+            | None, [single] -> single
+            | None, [one;two] -> seqExpr one two
+            | Some exp, [single] -> seqExpr exp single
+            | None, head::shoulders::tail ->
+                seqExpr head shoulders
+                |> Some
+                |> inner tail
+            | Some expr, head::tail ->
+                seqExpr expr head
+                |> Some
+                |> inner tail
+        inner exprs None
+
 
 type SynType with
     static member CreateApp (typ, args, ?isPostfix) =
@@ -244,8 +294,11 @@ type SynComponentInfoRcd with
         }
 
 type SynMemberDefn with
+    static member CreateImplicitCtor (ctorArgs) =
+        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats(ctorArgs, range0), None, range.Zero )
     static member CreateImplicitCtor() =
-        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats ([], range.Zero), None, range.Zero)
+        SynMemberDefn.CreateImplicitCtor []
+
     static member CreateMember (binding:SynBindingRcd) =
         SynMemberDefn.Member(binding.FromRcd, range.Zero)
     static member CreateInterface(interfaceType, members) =
@@ -522,3 +575,8 @@ type PreXmlDoc with
             if docs.IsSome
             then docs.Value
         ]
+
+type SynSimplePat with
+    static member CreateTyped(ident, ``type``) =
+        let ssp = SynSimplePat.Id(ident, None, false, false, false, range.Zero)
+        SynSimplePat.Typed(ssp, ``type``, range.Zero )
