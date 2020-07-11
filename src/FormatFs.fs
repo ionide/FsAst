@@ -6,7 +6,7 @@ open Fantomas
 open FSharp.Compiler.SourceCodeServices
 
 let formatAst ast =
-    let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true; PageWidth = 120 } // do not format comments
+    let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true } // do not format comments
     CodeFormatter.FormatASTAsync(ast, "temp.fsx", [], None, cfg)
 
 let formatFs fs checker = async {

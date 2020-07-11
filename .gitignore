@@ -242,3 +242,4 @@ msbuild.binlog
 /fcs/FSharp.Compiler.Service.netstandard/*.fsi
 /.ionide
 /bin
+/.idea
