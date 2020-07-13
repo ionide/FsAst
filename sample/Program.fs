@@ -9,14 +9,19 @@ let main argv =
 //        @"/Enum.fs"
 //        @"/PInvoke.fs"
 
+    let checker = Fantomas.FakeHelpers.sharedChecker.Value
+
     printfn "### printAstInfo\n"
-    PrintAstInfo.printAstInfo fs
+    PrintAstInfo.printAstInfo fs checker
+    |> Async.RunSynchronously
 
     printfn "\n### formatFs:\n"
-    FormatFs.formatFs fs
+    FormatFs.formatFs fs checker
+    |> Async.RunSynchronously
 
     printfn "\n### create AST:\n"
     CreateAst.createBasicClass()
+    |> Async.RunSynchronously
 //    CreateAst.createBasicEnums()
 //    CreateAst.createBasicPInvoke()
     0
