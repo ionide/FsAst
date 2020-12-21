@@ -122,8 +122,8 @@ let printAstInfo filename checker =
                                     printType 4 typ
                         | repr -> printfn "not matched: %A" repr
                     printfn "Members: %A" t.Members
-                | SynModuleDecl.Open(id, _) ->
-                    printfn "open: %s" id.AsString
+                | SynModuleDecl.Open(SynOpenDeclTarget.ModuleOrNamespace (id,_), _) ->
+                    printfn "open: %s" id.Head.idText
                 | SynModuleDecl.Let(a, bindings, _) ->
                     printfn "%d let bindings, %b" bindings.Length a
                     for binding in bindings |> List.map (fun b -> b.ToRcd) do
@@ -143,9 +143,9 @@ let printAstInfo filename checker =
                                 printfn "  attribute: %s" a.TypeName.AsString
                                 printExpr 4 a.ArgExpr
                         match binding.ValData with
-                        | SynValData.SynValData(memberFlags, valInfo, id) ->
-                            printfn "  ValData: id %A, %d args" id valInfo.ArgInfos.Length
-                            for args in valInfo.ArgInfos do
+                        | SynValData.SynValData(memberFlags, (SynValInfo (argsInfo, retInfo)), id) ->
+                            printfn "  ValData: id %A, %d args" id argsInfo.Length
+                            for args in argsInfo do
                                 printfn "    %d sub args" args.Length
                                 for arg in args do
                                     match arg with

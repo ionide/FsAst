@@ -1,5 +1,5 @@
 source https://api.nuget.org/v3/index.json
 
-nuget Fantomas 4.0.0-alpha-012
-nuget FSharp.Compiler.Service 36.0.1
-nuget Microsoft.SourceLink.GitHub 1.0.0
+nuget FSharp.Compiler.Service ~> 38
+nuget Microsoft.SourceLink.GitHub
+nuget Fantomas

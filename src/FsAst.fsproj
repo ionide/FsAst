@@ -18,8 +18,6 @@
   <ItemGroup>
     <Compile Include="AstRcd.fs" />
     <Compile Include="AstCreate.fs" />
-    <Compile Include="PrintAstInfo.fs" />
-    <Compile Include="FormatFs.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

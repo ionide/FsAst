@@ -380,12 +380,16 @@ type SynEnumCase with
 
 type XmlDoc with
     member x.Lines =
-        match x with
-        | XmlDoc lines -> lines
+        x.GetElaboratedXmlLines()
 
 type PreXmlDoc with
-    member x.Lines  =
-        x.ToXmlDoc().Lines
+    member x.Lines: string []  =
+        match x with
+        | PreXmlDocEmpty -> [||]
+        | PreXmlMerge(d, d2) ->
+            [| yield! d.Lines; yield! d2.Lines |]
+        | PreXmlDoc(_, d) ->
+            [||] //TODO: this is wrong, but no idea how to fix it
 
 
 type SynUnionCaseRcd = {

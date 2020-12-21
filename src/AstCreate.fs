@@ -103,7 +103,7 @@ type SynExpr with
         let copyInfo = Some (copyInfo, blockSep)
         SynExpr.Record (None, copyInfo, fieldUpdates, range.Zero)
     /// Creates:
-    /// 
+    ///
     /// ```
     /// match matchExpr with
     /// | clause1
@@ -157,7 +157,7 @@ type SynType with
         SynType.CreateLongIdent("unit")
     static member CreateFun (fieldTypeIn, fieldTypeOut) =
         SynType.Fun (fieldTypeIn, fieldTypeOut, range.Zero)
-    
+
     static member Create(name: string) = SynType.CreateLongIdent name
 
     static member Option(inner: SynType) =
@@ -170,7 +170,7 @@ type SynType with
             greaterRange=None,
             lessRange=None
         )
-        
+
     static member Option(inner: string) =
         SynType.App(
             typeName=SynType.CreateLongIdent "Option",
@@ -223,8 +223,8 @@ type SynType with
 
     static member Int() =
         SynType.Create "int"
-    
-    static member Int64() = 
+
+    static member Int64() =
         SynType.Create "int64"
 
     static member String() =
@@ -238,8 +238,8 @@ type SynType with
 
     static member Decimal() =
         SynType.Create "decimal"
-        
-    
+
+
 type SynArgInfo with
     static member Empty =
         SynArgInfo(SynAttributes.Empty, false, None)
@@ -295,7 +295,7 @@ type SynComponentInfoRcd with
 
 type SynMemberDefn with
     static member CreateImplicitCtor (ctorArgs) =
-        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats(ctorArgs, range0), None, range.Zero )
+        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats(ctorArgs, range0), None, PreXmlDoc.PreXmlDocEmpty, range.Zero )
     static member CreateImplicitCtor() =
         SynMemberDefn.CreateImplicitCtor []
 
@@ -566,7 +566,8 @@ type PreXmlDoc with
         let mutable i = 0
         for line in lines do
             let p = mkPos i 0
-            dc.AddXmlDocLine(line, p)
+            let r = mkRange "" p p
+            dc.AddXmlDocLine(line, r)
             i <- i + 1
         PreXmlDoc.CreateFromGrabPoint(dc, mkPos i 0)
 

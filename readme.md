@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/FsAst.svg)](https://www.nuget.org/packages/FsAst/)
 
-Set of helpers for creating and manipulating F# AST and generating F# code from AST.
+Set of helpers for creating and manipulating F# AST.
 
 FsAst is part of Ionide tooling suite - You can support its development on [Open Collective](https://opencollective.com/ionide).
 
@@ -15,6 +15,7 @@ FsAst is part of Ionide tooling suite - You can support its development on [Open
 
 * Original blog post about the project by [@ctaggart](https://github.com/ctaggart) - http://blog.ctaggart.com/2014/09/generating-f-code-using-its-ast.html
 * Applied Meta-Programming with Myriad and Falanax by [@7sharp9](https://github.com/7sharp9)  - https://7sharp9.dev/2019/04/24/2019-04-24-applied-metaprogramming-with-myriad/
+* Sample for printing out generated code with Fantomas - https://github.com/ionide/FsAst/tree/master/sample
 
 ## Build process
 
