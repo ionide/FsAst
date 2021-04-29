@@ -28,8 +28,8 @@ type LongIdentWithDots with
         sb.ToString()
 
 type SynPatLongIdentRcd with
-    static member Create (id, args) =
-        { Id = id; Args = args; Access = None; Range = range.Zero }
+    static member Create (id, args, ?extraId, ?typarDecls, ?access) =
+        { Id = id; ExtraId = extraId; TyparDecls = typarDecls ; Args = args; Access = access; Range = range.Zero }
 
 type SynArgPats with
     static member Empty =
