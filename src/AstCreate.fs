@@ -171,6 +171,39 @@ type SynType with
             lessRange=None
         )
 
+    static member ResizeArray(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "ResizeArray",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member Set(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "Set",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member NativePointer(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "nativeptr",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
     static member Option(inner: string) =
         SynType.App(
             typeName=SynType.CreateLongIdent "Option",
@@ -193,9 +226,31 @@ type SynType with
             lessRange=None
         )
 
+    static member Map(key, value) = 
+        SynType.App(
+            typeName=SynType.CreateLongIdent "Map",
+            typeArgs=[ key; value ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
     static member List(inner: SynType) =
         SynType.App(
             typeName=SynType.CreateLongIdent "list",
+            typeArgs=[ inner ],
+            commaRanges = [ ],
+            isPostfix = false,
+            range=range0,
+            greaterRange=None,
+            lessRange=None
+        )
+
+    static member Array(inner: SynType) =
+        SynType.App(
+            typeName=SynType.CreateLongIdent "array",
             typeArgs=[ inner ],
             commaRanges = [ ],
             isPostfix = false,
@@ -221,11 +276,32 @@ type SynType with
     static member DateTime() =
         SynType.LongIdent(LongIdentWithDots.Create [ "System"; "DateTime" ])
 
+    static member Guid() = 
+        SynType.LongIdent(LongIdentWithDots.Create [ "System"; "Guid" ])
+
     static member Int() =
         SynType.Create "int"
 
+    static member UInt() = 
+        SynType.Create "uint"
+
+    static member Int8() = 
+        SynType.Create "int8"
+
+    static member UInt8() = 
+        SynType.Create "uint8"
+
+    static member Int16() = 
+        SynType.Create "int16"
+
+    static member UInt16() = 
+        SynType.Create "uint16"
+
     static member Int64() =
         SynType.Create "int64"
+
+    static member UInt64() =
+        SynType.Create "uint64"
 
     static member String() =
         SynType.Create "string"
@@ -236,9 +312,26 @@ type SynType with
     static member Float() =
         SynType.Create "float"
 
+    static member Float32() =
+        SynType.Create "float32"
+
+    static member Double() =
+        SynType.Create "float"
+
     static member Decimal() =
         SynType.Create "decimal"
 
+    static member Unit() = 
+        SynType.Create "unit"
+
+    static member BigInt() = 
+        SynType.Create "bigint"
+
+    static member Byte() = 
+        SynType.Create "byte"
+
+    static member Char() = 
+        SynType.Create "char"
 
 type SynArgInfo with
     static member Empty =
@@ -333,6 +426,8 @@ type SynModuleDecl with
         SynModuleDecl.Types( [SynTypeDefnRcd.CreateSimple(info, simple.FromRcd, members = Option.defaultValue [] members).FromRcd], range.Zero)
     static member CreateOpen id =
         SynModuleDecl.Open(id, range.Zero)
+    static member CreateOpen (fullNamespaceOrModuleName: string) =
+        SynModuleDecl.Open(SynOpenDeclTarget.ModuleOrNamespace(Ident.CreateLong fullNamespaceOrModuleName, range.Zero), range.Zero)
     static member CreateHashDirective (directive, values) =
         SynModuleDecl.HashDirective (ParsedHashDirective (directive, values, range.Zero), range.Zero)
     static member CreateLet (bindings: SynBindingRcd list) =
@@ -560,6 +655,9 @@ type SynAttribute with
     static member RequireQualifiedAccess() =
         SynAttribute.Create("RequireQualifiedAccess")
 
+    static member CompiledName(valueArg: string) = 
+        SynAttribute.Create("CompiledName", valueArg)
+
 type PreXmlDoc with
     static member Create lines =
         let dc = XmlDocCollector()
@@ -575,6 +673,12 @@ type PreXmlDoc with
         PreXmlDoc.Create [
             if docs.IsSome
             then docs.Value
+        ]
+
+    static member Create(docs: string) = 
+        PreXmlDoc.Create [
+            if not (String.IsNullOrWhiteSpace docs)
+            then docs
         ]
 
 type SynSimplePat with

@@ -75,7 +75,7 @@ let createBasicPInvoke() =
     async {
         let mdl = "BasicPInvoke"
 
-        let opn = SynModuleDecl.CreateOpen (LongIdentWithDots.CreateString "System.Runtime.InteropServices")
+        let opn = SynModuleDecl.CreateOpen "System.Runtime.InteropServices"
 
         let at : SynAttribute =
             {   TypeName = LongIdentWithDots.CreateString "DllImport"
@@ -98,26 +98,25 @@ let createBasicPInvoke() =
             }
 
         let args =
-            [   "char", "transa"
-                "char", "transb"
-                "int", "m"
-                "int", "n"
-                "int", "k"
-                "double", "alpha"
-                "double", "a"
-                "int", "lda"
-                "double", "b"
-                "int", "ldb"
-                "double", "beta"
-                "double", "c"
-                "int", "ldc"
+            [   SynType.Char(), "transa"
+                SynType.Char(), "transb"
+                SynType.Int(), "m"
+                SynType.Int(), "n"
+                SynType.Int(), "k"
+                SynType.Double(), "alpha"
+                SynType.Double(), "a"
+                SynType.Int(), "lda"
+                SynType.Double(), "b"
+                SynType.Int(), "ldb"
+                SynType.Double(), "beta"
+                SynType.Double(), "c"
+                SynType.Int(), "ldc"
             ]
             |> List.map (fun (typ, name) ->
                 SynPatRcd.CreateAttrib(
                     SynPatRcd.CreateTyped(
                         SynPatRcd.CreateNamed(Ident.Create name, SynPatRcd.CreateWild),
-                        SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString "nativeptr"),
-                            [SynType.CreateApp(SynType.CreateLongIdent(LongIdentWithDots.CreateString typ), [])])
+                        SynType.NativePointer(typ)
                     ),
                     []
                 )
