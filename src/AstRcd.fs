@@ -157,6 +157,8 @@ and SynPatAttribRcd = {
 
 and SynPatLongIdentRcd = {
     Id: LongIdentWithDots
+    ExtraId : Ident option
+    TyparDecls : SynValTyparDecls option
     Args: SynArgPats
     Access: SynAccess option
     Range: range }
@@ -195,7 +197,7 @@ and SynPatTypedRcd with
 and SynPatAttribRcd with
     member x.FromRcd = SynPat.Attrib(x.Pattern.FromRcd, x.Attributes, x.Range)
 and SynPatLongIdentRcd with
-    member x.FromRcd = SynPat.LongIdent(x.Id, None, None, x.Args, None, x.Range)
+    member x.FromRcd = SynPat.LongIdent(x.Id, x.ExtraId, x.TyparDecls, x.Args, x.Access, x.Range)
 and SynPatTupleRcd with
     member x.FromRcd = SynPat.Tuple(false, x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
 and SynPatParenRcd with
@@ -218,8 +220,8 @@ type SynPat with
             SynPatRcd.Attrib { Pattern = pattern.ToRcd; Attributes = attributes; Range = range }
 //        | SynPat.Or
 //        | SynPat.Ands
-        | SynPat.LongIdent(id, _, _, args, access, range) ->
-            SynPatRcd.LongIdent { Id = id; Args = args; Access = access; Range = range }
+        | SynPat.LongIdent(id, extraId, typarDecls , args, access, range) ->
+            SynPatRcd.LongIdent { Id = id; ExtraId = extraId; TyparDecls = typarDecls; Args = args; Access = access; Range = range }
         | SynPat.Tuple(_, patterns, range) ->
             SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
         | SynPat.Paren(pattern, range) ->
