@@ -1,4 +1,4 @@
-$version = '0.7.0' # the version under development, update after a release
+$version = '0.8.0' # the version under development, update after a release
 
 dotnet tool restore
 dotnet build -c Release FsAst.sln /p:Version=$version
