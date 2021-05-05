@@ -400,7 +400,7 @@ type SynMemberDefn with
         SynMemberDefn.Member(binding.FromRcd, range.Zero)
 
     /// <summary>
-    /// Creates an instance member from a binding definition: [static member {binding} = {expr}]
+    /// Creates a member from a binding definition: [static member {binding} = {expr}]
     /// where {binding} = {pattern args} and {expr} is the body of the static binding
     /// </summary>
     static member CreateStaticMember(binding:SynBindingRcd) = 
