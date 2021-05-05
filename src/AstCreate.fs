@@ -392,8 +392,46 @@ type SynMemberDefn with
     static member CreateImplicitCtor() =
         SynMemberDefn.CreateImplicitCtor []
 
+    /// <summary>
+    /// Creates an instance member from a binding definition: [member {binding} = {expr}]
+    /// where {binding} = {this.pattern args} and {expr} is the body of the binding
+    /// </summary>
     static member CreateMember (binding:SynBindingRcd) =
         SynMemberDefn.Member(binding.FromRcd, range.Zero)
+
+    /// <summary>
+    /// Creates an instance member from a binding definition: [static member {binding} = {expr}]
+    /// where {binding} = {pattern args} and {expr} is the body of the static binding
+    /// </summary>
+    static member CreateStaticMember(binding:SynBindingRcd) = 
+        let (SynValData(usedMemberFlags, valInfo, identifier)) = binding.ValData
+        let staticMemberFlags = Some { 
+            // this means the member is static
+            IsInstance = false; 
+            IsOverrideOrExplicitImpl = false
+            IsDispatchSlot = false;
+            IsFinal = false
+            MemberKind = MemberKind.Member
+        }
+        let staticBinding = { binding with ValData = SynValData.SynValData(staticMemberFlags, valInfo, identifier) }
+        SynMemberDefn.Member(staticBinding.FromRcd, range.Zero)
+
+    /// <summary>
+    /// Creates an instance member from a binding definition: [override {binding} = {expr}]
+    /// where {binding} = {this.pattern args} and {expr} is the body of the static binding
+    /// </summary>
+    static member CreateOverrideMember(binding:SynBindingRcd) = 
+        let (SynValData(usedMemberFlags, valInfo, identifier)) = binding.ValData
+        let overrideMemberFlags = Some { 
+            IsInstance = true; 
+            IsOverrideOrExplicitImpl = true
+            IsDispatchSlot = false;
+            IsFinal = false
+            MemberKind = MemberKind.Member
+        }
+        let overrideBinding = { binding with ValData = SynValData.SynValData(overrideMemberFlags, valInfo, identifier) }
+        SynMemberDefn.Member(overrideBinding.FromRcd, range.Zero)
+
     static member CreateInterface(interfaceType, members) =
         SynMemberDefn.Interface(interfaceType, members, range.Zero)
 
