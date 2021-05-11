@@ -111,25 +111,34 @@ type SynTypeDefnRepr with
 // TODO other SynPat cases
 [<RequireQualifiedAccess>]
 type SynPatRcd =
+    /// <summary>Creates a pattern of a constant value for example a literal string pattern that can be used in a match case</summary>
     | Const of SynPatConstRcd
+    /// <summary>Creates a wild '_' pattern</summary>
     | Wild of SynPatWildRcd
     | Named of SynPatNamedRcd
+    /// <summary>Creates a typed pattern 'pattern : type'</summary>
     | Typed of SynPatTypedRcd
     | Attrib of SynPatAttribRcd
-//    | Or
-//    | Ands
+    /// <summary>An OR pattern 'leftPattern | rightPattern'</summary>
+    | Or of SynPatOrRcd
+    /// <summary>
+    /// An AND pattern 'leftPattern AND rightPattern'
+    /// </summary>
+    | Ands  of SynPatAndsRcd
     | LongIdent of SynPatLongIdentRcd
     | Tuple of SynPatTupleRcd
     | Paren of SynPatParenRcd
-//    | ArrayOrList
-//    | Record
+    | ArrayOrList of SynPatArrayOrListRcd
     | Null of SynPatNullRcd
-//    | OptionalVal
-//    | IsInst
-//    | QuoteExpr
-//    | DeprecatedCharRange
-//    | InstanceMember
-//    | FromParseError
+    /// <summary>Creates an optional pattern '?pat' used for example to create optional parameters on static functions etc.</summary>
+    | OptionalVal of SynPatOptionalValRcd
+    /// <summary>A type test pattern ':? typeName'</summary>
+    | IsInstance of SynPatIsInstanceRcd
+    | Record of SynPatRecordRcd
+    | QuoteExpr of SynPatQuoteExprRcd 
+    | DeprecatedCharRange of SynPatDeprecatedCharRangeRcd
+    | InstanceMember of SynPatInstanceMemberRcd
+    | FromParseError of SynPatFromParseErrorRcd
 
 and SynPatConstRcd = {
     Const: SynConst
@@ -149,6 +158,55 @@ and SynPatTypedRcd = {
     Pattern: SynPatRcd
     Type: SynType
     Range: range }
+
+and SynPatOptionalValRcd = {
+    Id: Ident
+    Range: range
+}
+
+and SynPatOrRcd = { 
+    Left: SynPatRcd
+    Right: SynPatRcd 
+    Range: range }
+
+and SynPatAndsRcd = { 
+    Patterns: SynPatRcd list 
+    Range: range }
+
+and SynPatArrayOrListRcd = {
+    IsArray: bool 
+    Elements: SynPatRcd list
+    Range: range }
+
+and SynPatIsInstanceRcd = {
+    Type : SynType 
+    Range : range }
+
+and SynPatRecordRcd = {
+    Fields : ((LongIdent * Ident) * SynPatRcd) list
+    Range : range
+}
+
+and SynPatQuoteExprRcd = {
+    Expr : SynExpr
+    Range : range
+}
+
+and SynPatDeprecatedCharRangeRcd = {
+    StartChar: char
+    EndChar: char
+    Range : range }
+
+and SynPatInstanceMemberRcd = {
+    ThisId: Ident
+    MemberId: Ident
+    ToolingId: Ident option
+    Accessibility: SynAccess option
+    Range: range }
+
+and SynPatFromParseErrorRcd = {
+    Pattern : SynPatRcd
+    Range : range }
 
 and SynPatAttribRcd = {
     Pattern: SynPatRcd
@@ -186,6 +244,17 @@ type SynPatRcd  with
         | Tuple t -> t.FromRcd
         | Paren t -> t.FromRcd
         | Null n -> n.FromRcd
+        | OptionalVal n -> n.FromRcd
+        | Or n -> n.FromRcd
+        | Ands n -> n.FromRcd
+        | ArrayOrList n -> n.FromRcd 
+        | IsInstance n -> n.FromRcd
+        | Record n -> n.FromRcd
+        | QuoteExpr n -> n.FromRcd
+        | DeprecatedCharRange n -> n.FromRcd
+        | InstanceMember n -> n.FromRcd
+        | FromParseError n -> n.FromRcd
+
 and SynPatConstRcd with
     member x.FromRcd = SynPat.Const(x.Const, x.Range)
 and SynPatWildRcd with
@@ -204,7 +273,28 @@ and SynPatParenRcd with
     member x.FromRcd = SynPat.Paren(x.Pattern.FromRcd, x.Range)
 and SynPatNullRcd with
     member x.FromRcd = SynPat.Null(x.Range)
-
+and SynPatOptionalValRcd with 
+    member x.FromRcd = SynPat.OptionalVal(x.Id, x.Range)
+and SynPatOrRcd with 
+    member x.FromRcd = SynPat.Or(x.Left.FromRcd, x.Right.FromRcd, x.Range)
+and SynPatAndsRcd with 
+    member x.FromRcd = SynPat.Ands(x.Patterns |> List.map (fun pat -> pat.FromRcd), x.Range)
+and SynPatArrayOrListRcd with 
+    member x.FromRcd = SynPat.ArrayOrList(x.IsArray, x.Elements |> List.map (fun pat -> pat.FromRcd), x.Range)
+and SynPatIsInstanceRcd with 
+    member x.FromRcd = SynPat.IsInst(x.Type, x.Range)
+and SynPatRecordRcd with 
+    member x.FromRcd =
+        let fields = [ for ((idents, ident), pattern) in x.Fields -> ((idents, ident), pattern.FromRcd) ]
+        SynPat.Record(fields, x.Range)
+and SynPatQuoteExprRcd with 
+    member x.FromRcd = SynPat.QuoteExpr(x.Expr, x.Range)
+and SynPatDeprecatedCharRangeRcd with 
+    member x.FromRcd = SynPat.DeprecatedCharRange(x.StartChar, x.EndChar, x.Range)
+and SynPatInstanceMemberRcd with 
+    member x.FromRcd = SynPat.InstanceMember(x.ThisId, x.MemberId, x.ToolingId, x.Accessibility, x.Range)
+and SynPatFromParseErrorRcd with 
+    member x.FromRcd = SynPat.FromParseError(x.Pattern.FromRcd, x.Range)
 type SynPat with
     member x.ToRcd =
         match x with
@@ -218,25 +308,69 @@ type SynPat with
             SynPatRcd.Typed { Pattern = pattern.ToRcd; Type = typ; Range = range }
         | SynPat.Attrib(pattern, attributes, range) ->
             SynPatRcd.Attrib { Pattern = pattern.ToRcd; Attributes = attributes; Range = range }
-//        | SynPat.Or
-//        | SynPat.Ands
+        | SynPat.Or(left, right, range) -> 
+            SynPatRcd.Or { Left = left.ToRcd; Right = right.ToRcd; Range = range }
+        | SynPat.Ands(patterns, range) -> 
+            SynPatRcd.Ands { Patterns = patterns |> List.map (fun pat -> pat.ToRcd); Range = range }
         | SynPat.LongIdent(id, extraId, typarDecls , args, access, range) ->
             SynPatRcd.LongIdent { Id = id; ExtraId = extraId; TyparDecls = typarDecls; Args = args; Access = access; Range = range }
         | SynPat.Tuple(_, patterns, range) ->
             SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
         | SynPat.Paren(pattern, range) ->
             SynPatRcd.Paren { Pattern = pattern.ToRcd; Range = range }
-//        | SynPat.ArrayOrList
-//        | SynPat.Record
+        | SynPat.ArrayOrList(isArray, elementPatterns, range) -> 
+            SynPatRcd.ArrayOrList {
+                IsArray = isArray
+                Elements = elementPatterns |> List.map (fun p -> p.ToRcd)
+                Range = range
+            }
+        | SynPat.Record(fields, range) -> 
+            SynPatRcd.Record {
+                Fields = [ 
+                    for ((idents, ident), pat) in fields -> 
+                        ((idents, ident), pat.ToRcd)
+                ]
+
+                Range = range
+            }
+
         | SynPat.Null range ->
             SynPatRcd.Null { Range = range }
-//        | SynPat.OptionalVal
-//        | SynPat.IsInst
-//        | SynPat.QuoteExpr
-//        | SynPat.DeprecatedCharRange
-//        | SynPat.InstanceMember
-//        | SynPat.FromParseError
-        | _ -> failwithf "SynPat.ToRcd not implemented for %A" x
+        | SynPat.OptionalVal (ident, range) -> 
+            SynPatRcd.OptionalVal { Id = ident; Range = range }
+        | SynPat.IsInst(typeToTest, range) -> 
+            SynPatRcd.IsInstance {
+                Type = typeToTest
+                Range = range
+            }
+
+        | SynPat.QuoteExpr(expr, range) -> 
+            SynPatRcd.QuoteExpr {
+                Expr = expr
+                Range = range
+            }
+
+        | SynPat.DeprecatedCharRange(startChar, endChar, range) -> 
+            SynPatRcd.DeprecatedCharRange {
+                StartChar = startChar
+                EndChar = endChar
+                Range = range
+            }
+
+        | SynPat.InstanceMember(thisId, memberId, toolingId, accessibility, range) -> 
+            SynPatRcd.InstanceMember {
+                ThisId = thisId
+                MemberId = memberId
+                ToolingId = toolingId
+                Accessibility = accessibility
+                Range = range
+            }
+
+        | SynPat.FromParseError(pattern, range) -> 
+            SynPatRcd.FromParseError {
+                Pattern = pattern.ToRcd
+                Range = range
+            }
 
 type SynBindingReturnInfoRcd = {
     Type: SynType
