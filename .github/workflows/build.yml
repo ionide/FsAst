@@ -22,4 +22,4 @@ jobs:
     - name: Run build
       run: dotnet build -c Release
     - name: Test packaging
-      run: dotnet pack -c Release --no-build
+      run: dotnet pack -c Release
