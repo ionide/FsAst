@@ -2,7 +2,9 @@
 module FsAst.AstCreate
 open System
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
+open FSharp.Compiler.Text.Range
+open FSharp.Compiler.Text.Pos
 open FSharp.Compiler.XmlDoc
 
 type Ident with
@@ -388,7 +390,7 @@ type SynComponentInfoRcd with
 
 type SynMemberDefn with
     static member CreateImplicitCtor (ctorArgs) =
-        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats(ctorArgs, range0), None, PreXmlDoc.PreXmlDocEmpty, range.Zero )
+        SynMemberDefn.ImplicitCtor(None, SynAttributes.Empty, SynSimplePats.SimplePats(ctorArgs, range0), None, PreXmlDoc.Empty, range.Zero )
     static member CreateImplicitCtor() =
         SynMemberDefn.CreateImplicitCtor []
 
@@ -697,15 +699,13 @@ type SynAttribute with
         SynAttribute.Create("CompiledName", valueArg)
 
 type PreXmlDoc with
-    static member Create lines =
-        let dc = XmlDocCollector()
-        let mutable i = 0
-        for line in lines do
-            let p = mkPos i 0
-            let r = mkRange "" p p
-            dc.AddXmlDocLine(line, r)
-            i <- i + 1
-        PreXmlDoc.CreateFromGrabPoint(dc, mkPos i 0)
+    static member Create (lines: string list) =
+        let lines = List.toArray lines
+        let lineMaxIndex = Array.length lines - 1
+        let s = mkPos 0 0
+        let e = mkPos lineMaxIndex 0
+        let containingRange = mkRange "" s e
+        PreXmlDoc.Create(lines, containingRange)
 
     static member Create (docs: string option) =
         PreXmlDoc.Create [

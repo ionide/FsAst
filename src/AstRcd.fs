@@ -2,7 +2,7 @@
 module FsAst.AstRcd
 
 open System
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.XmlDoc
 
@@ -443,7 +443,7 @@ and SynTypeDefnSimpleReprGeneralRcd = {
     Range: range }
 
 and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd = {
-    ILType: FSharp.Compiler.AbstractIL.IL.ILType
+    ILType: obj // this type is FSharp.Compiler.AbstractIL.IL.ILType but is hidden to avoid the representation of AbstractIL being public
     Range: range }
 
 and SynTypeDefnSimpleReprTypeAbbrevRcd = {
@@ -520,13 +520,7 @@ type XmlDoc with
 
 type PreXmlDoc with
     member x.Lines: string []  =
-        match x with
-        | PreXmlDocEmpty -> [||]
-        | PreXmlMerge(d, d2) ->
-            [| yield! d.Lines; yield! d2.Lines |]
-        | PreXmlDoc(_, d) ->
-            [||] //TODO: this is wrong, but no idea how to fix it
-
+        x.ToXmlDoc(false, None).Lines
 
 type SynUnionCaseRcd = {
     Attributes: SynAttributes

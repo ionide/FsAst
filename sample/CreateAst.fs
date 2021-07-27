@@ -4,7 +4,7 @@ module FsAst.CreateAst
 open System
 open Fantomas
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open Microsoft.FSharp.Quotations
 open FSharp.Compiler.XmlDoc
 
