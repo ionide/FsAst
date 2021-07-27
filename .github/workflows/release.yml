@@ -1,0 +1,57 @@
+name: Release
+
+
+on:
+  push:
+    tags:
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        dotnet: [5.0.100]
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Get version from tag
+      id: tag_name
+      run: |
+        echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+      shell: bash
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    - name: Get Changelog Entry
+      id: changelog_reader
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        version: ${{ steps.tag_name.outputs.current_version }}
+        path: ./CHANGELOG.md
+    - name: Restore tools
+      run: dotnet tool restore
+    - name: Run build
+      run: dotnet build -c Release /p:Version=${{ steps.tag_name.outputs.current_version }} 
+    - name: Create package
+      run: dotnet pack -c Release --no-build /p:Version=${{ steps.tag_name.outputs.current_version }} /p:PackageReleaseNotes=${{ steps.changelog_reader.outputs.changes }} -o ./bin
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.changelog_reader.outputs.version }}
+        name : Release ${{ steps.changelog_reader.outputs.version }}
+        body: ${{ steps.changelog_reader.outputs.changes }}
+        prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
+        draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
+        files: |
+          ./bin/FsAst.*.nupkg
+    - name: Publish package to nuget
+      env: 
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      run: dotnet nuget push ./bin/FsAst.*.nupkg --api-key $NUGET_KEY --source https://api.nuget.org/v3/index.json
+
