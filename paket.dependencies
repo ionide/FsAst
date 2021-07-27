@@ -1,5 +1,8 @@
 source https://api.nuget.org/v3/index.json
 
-nuget FSharp.Compiler.Service ~> 38
-nuget Microsoft.SourceLink.GitHub
+storage: none
+framework: netstandard2.0, netcoreapp3.1
+
+nuget FSharp.Compiler.Service ~> 39
+nuget Microsoft.SourceLink.GitHub copy_local: true
 nuget Fantomas
