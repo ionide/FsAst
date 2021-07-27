@@ -37,7 +37,7 @@ jobs:
     - name: Run build
       run: dotnet build -c Release /p:Version=${{ steps.tag_name.outputs.current_version }} 
     - name: Create package
-      run: dotnet pack -c Release --no-build /p:Version=${{ steps.tag_name.outputs.current_version }} /p:PackageReleaseNotes=${{ steps.changelog_reader.outputs.changes }} -o ./bin
+      run: dotnet pack -c Release /p:Version=${{ steps.tag_name.outputs.current_version }} /p:PackageReleaseNotes=${{ steps.changelog_reader.outputs.changes }} -o ./bin
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
