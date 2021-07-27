@@ -9,7 +9,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 ---
 
 ## [Released]
-
+## [0.10.0] - 2021-07-27
+### Changed
+- Updated to FCS 39
+- Updated to Fantomas 4.5.1
 
 ---
 
