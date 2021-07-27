@@ -5,7 +5,7 @@
     <Description>Helpers for the F# Abstract Syntax Tree</Description>
     <Owners>Cameron Taggart, Krzysztof Cieslak</Owners>
     <Authors>Cameron Taggart, Dave Thomas, Krzysztof Cieslak</Authors>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>f#;ast</PackageTags>
     <PackageProjectUrl>https://github.com/Ionide/FsAst/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ionide/FsAst.git</RepositoryUrl>
