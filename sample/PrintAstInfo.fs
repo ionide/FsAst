@@ -3,8 +3,8 @@ module FsAst.PrintAstInfo
 
 open System.IO
 open Fantomas
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.CodeAnalysis
 
 let rec printType indent typ =
     match typ with
@@ -22,7 +22,7 @@ let rec printExpr indent expr =
     | SynExpr.Const(c,_) ->
         match c with
         | SynConst.Int32 i -> printfn "%*sConst Int32: %d" indent "" i
-        | SynConst.String (s,_) -> printfn "%*sConst String: %s" indent "" s
+        | SynConst.String (s, _, _) -> printfn "%*sConst String: %s" indent "" s
         | cnst -> printfn "%*scnst not matched: %A" indent "" cnst
     | SynExpr.Paren(innerExpr, _, _, _) ->
         printfn "%*sParen expr" indent ""
@@ -78,7 +78,7 @@ let rec printPattern indent pat =
 let printAstInfo filename checker =
     async {
     let s = File.ReadAllText filename
-    let parsOpt = {FSharpParsingOptions.Default with SourceFiles = [|filename|]}
+    let parsOpt = { FSharpParsingOptions.Default with SourceFiles = [|filename|]}
     let! res = CodeFormatter.ParseAsync(filename, SourceOrigin.SourceString s, parsOpt, checker)
     for (ast,_) in res do
         match ast with
@@ -114,7 +114,7 @@ let printAstInfo filename checker =
                         | SynTypeDefnSimpleReprRcd.Record record ->
                             for field in record.Fields do
                                 match field with
-                                | SynField.Field(attribs, isstatic, ident, typ, e, prexmldoc, access, range) ->
+                                | SynField(attribs, isstatic, ident, typ, e, prexmldoc, access, range) ->
                                     printfn "%s:"
                                         (match ident with
                                         | Some i -> i.idText

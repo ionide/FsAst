@@ -3,8 +3,8 @@ module FsAst.AstRcd
 
 open System
 open FSharp.Compiler.Text
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.XmlDoc
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.Xml
 
 type ParsedImplFileInputRcd = {
     File: string
@@ -53,26 +53,27 @@ type SynComponentInfoRcd = {
     Range: range }
 with
     member x.FromRcd =
-        ComponentInfo(x.Attributes, x.Parameters, x.Constraints, x.Id, x.XmlDoc, x.PreferPostfix, x.Access, x.Range)
+        SynComponentInfo(x.Attributes, x.Parameters, x.Constraints, x.Id, x.XmlDoc, x.PreferPostfix, x.Access, x.Range)
 
 type SynComponentInfo with
     member x.ToRcd =
-        let (ComponentInfo(attributes, parameters, constraints, id, xmldoc, preferPostfix, access, range)) = x
+        let (SynComponentInfo(attributes, parameters, constraints, id, xmldoc, preferPostfix, access, range)) = x
         { Attributes = attributes; Parameters = parameters; Constraints = constraints; Id = id; XmlDoc = xmldoc; PreferPostfix = preferPostfix; Access = access; Range = range }
 
 type SynTypeDefnRcd = {
     Info: SynComponentInfoRcd
     Repr: SynTypeDefnRepr
     Members: SynMemberDefns
+    ImplicitConstructor: SynMemberDefn option
     Range: range }
 with
     member x.FromRcd =
-        TypeDefn(x.Info.FromRcd, x.Repr, x.Members, x.Range)
+        SynTypeDefn(x.Info.FromRcd, x.Repr, x.Members, x.ImplicitConstructor, x.Range)
 
 type SynTypeDefn with
     member x.ToRcd =
-        let (TypeDefn(info, repr, members, range)) = x
-        { Info = info.ToRcd; Repr = repr; Members = members; Range = range }
+        let (SynTypeDefn(info, repr, members, implicitCtor, range)) = x
+        { Info = info.ToRcd; Repr = repr; Members = members; ImplicitConstructor = implicitCtor; Range = range }
 
 type SynTypeDefnReprObjectModelRcd = {
     Kind: SynTypeDefnKind
@@ -397,14 +398,14 @@ type SynBindingRcd = {
     ReturnInfo: SynBindingReturnInfoRcd option
     Expr: SynExpr
     Range: range
-    Bind: DebugPointForBinding }
+    Bind: DebugPointAtBinding }
 with
     member x.FromRcd =
-        Binding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
+        SynBinding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
 
 type SynBinding with
     member x.ToRcd =
-        let (Binding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
+        let (SynBinding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
         { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo |> Option.map (fun ri -> ri.ToRcd); Expr = rhsExpr; Range = mBind; Bind = spBind }
 
 [<RequireQualifiedAccess>]
@@ -447,7 +448,7 @@ and SynTypeDefnSimpleReprLibraryOnlyILAssemblyRcd = {
     Range: range }
 
 and SynTypeDefnSimpleReprTypeAbbrevRcd = {
-    ParseDetail: FSharp.Compiler.SyntaxTree.ParserDetail
+    ParseDetail: FSharp.Compiler.Syntax.ParserDetail
     Type: SynType
     Range: range }
 
@@ -502,17 +503,18 @@ type SynEnumCaseRcd = {
     Attributes: SynAttributes
     Id: Ident
     Constant: SynConst
+    ConstantRange: range
     XmlDoc: PreXmlDoc
     Range: range }
 with
     member x.FromRcd =
-        SynEnumCase.EnumCase(x.Attributes, x.Id, x.Constant, x.XmlDoc, x.Range)
+        SynEnumCase(x.Attributes, x.Id, x.Constant, x.ConstantRange, x.XmlDoc, x.Range)
 
 type SynEnumCase with
     member x.ToRcd =
         match x with
-        | EnumCase(attributes, id, constant, xmlDoc, range) ->
-            { Attributes = attributes; Id = id; Constant = constant; XmlDoc = xmlDoc; Range = range }
+        | SynEnumCase(attributes, id, constant, constantRange, xmlDoc, range) ->
+            { Attributes = attributes; Id = id; Constant = constant; ConstantRange = constantRange; XmlDoc = xmlDoc; Range = range }
 
 type XmlDoc with
     member x.Lines =
@@ -525,23 +527,23 @@ type PreXmlDoc with
 type SynUnionCaseRcd = {
     Attributes: SynAttributes
     Id: Ident
-    Type: SynUnionCaseType
+    Kind: SynUnionCaseKind
     XmlDoc: PreXmlDoc
     Access: SynAccess option
     Range: range }
 with
     member x.FromRcd =
-        SynUnionCase.UnionCase(x.Attributes, x.Id, x.Type, x.XmlDoc, x.Access, x.Range)
+        SynUnionCase(x.Attributes, x.Id, x.Kind, x.XmlDoc, x.Access, x.Range)
     member x.HasFields =
-        match x.Type with
-        | UnionCaseFields cases -> not cases.IsEmpty
+        match x.Kind with
+        | SynUnionCaseKind.Fields cases -> not cases.IsEmpty
         | _ -> false
 
 type SynUnionCase with
     member x.ToRcd : SynUnionCaseRcd =
         match x with
-        | SynUnionCase.UnionCase(attributes, id, typ, xmlDoc, access, range) ->
-            { Attributes = attributes; Id = id; Type = typ; XmlDoc = xmlDoc; Access = access; Range = range }
+        | SynUnionCase(attributes, id, kind, xmlDoc, access, range) ->
+            { Attributes = attributes; Id = id; Kind = kind; XmlDoc = xmlDoc; Access = access; Range = range }
 
 type SynFieldRcd = {
     Attributes: SynAttributes
@@ -554,12 +556,12 @@ type SynFieldRcd = {
     Range: range }
 with
     member x.FromRcd =
-        SynField.Field(x.Attributes, x.IsStatic, x.Id, x.Type, x.IsMutable, x.XmlDoc, x.Access, x.Range)
+        SynField(x.Attributes, x.IsStatic, x.Id, x.Type, x.IsMutable, x.XmlDoc, x.Access, x.Range)
 
 type SynField with
     member x.ToRcd: SynFieldRcd =
         match x with
-        | SynField.Field(attributes, isstatic, id, typ, ismutable, xmlDoc, access, range) ->
+        | SynField(attributes, isstatic, id, typ, ismutable, xmlDoc, access, range) ->
              { Attributes = attributes
                IsStatic = isstatic
                Id = id

@@ -3,10 +3,10 @@ module FsAst.CreateAst
 
 open System
 open Fantomas
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open Microsoft.FSharp.Quotations
-open FSharp.Compiler.XmlDoc
+open FSharp.Compiler.Xml
 
 let createBasicClass() =
     async {

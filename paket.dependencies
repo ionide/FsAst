@@ -7,3 +7,6 @@ nuget FSharp.Compiler.Service ~> 39
 nuget Fantomas
 
 nuget Microsoft.SourceLink.GitHub copy_local: true
+nuget FSharp.Compiler.Service ~> 40
+nuget Microsoft.SourceLink.GitHub copy_local: true
+nuget Fantomas
