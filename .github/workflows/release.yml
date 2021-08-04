@@ -15,10 +15,11 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+    # this step uses bash parameter substring removal to strip the leading refs/tags/ from the tag name
     - name: Get version from tag
       id: tag_name
       run: |
-        echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+        echo ::set-output name=current_version::${GITHUB_REF#refs/tags/}
       shell: bash
     - name: Checkout code
       uses: actions/checkout@v2
