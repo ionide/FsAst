@@ -38,8 +38,8 @@ type SynArgPats with
         SynArgPats.Pats[]
 
 type SynPatRcd with
-    static member CreateLongIdent (id, args: SynPatRcd list) =
-        SynPatRcd.LongIdent (SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynArgPats.Pats ))
+    static member CreateLongIdent (id, args: SynPatRcd list, ?access) =
+        SynPatRcd.LongIdent ( {SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynArgPats.Pats ) with Access = access } )
     static member CreateTuple patterns =
         SynPatRcd.Tuple { Patterns = patterns; Range = range.Zero }
     static member CreateParen pattern =
