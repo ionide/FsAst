@@ -723,3 +723,14 @@ type SynSimplePat with
     static member CreateTyped(ident, ``type``) =
         let ssp = SynSimplePat.Id(ident, None, false, false, false, range.Zero)
         SynSimplePat.Typed(ssp, ``type``, range.Zero )
+        
+    static member CreateId(ident, ?altNameRefCell, ?isCompilerGenerated, ?isThis, ?isOptional) =
+        SynSimplePat.Id(ident, altNameRefCell,
+                        Option.defaultValue false isCompilerGenerated,
+                        Option.defaultValue false isThis,
+                        Option.defaultValue false isOptional, 
+                        range0)
+                        
+type SynSimplePats with
+    static member Create(patterns) =
+        SynSimplePats.SimplePats(patterns, range0)
