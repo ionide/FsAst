@@ -482,6 +482,8 @@ type SynModuleDecl with
         SynModuleDecl.Attributes(attributes, range.Zero)
     static member CreateNestedModule(info : SynComponentInfoRcd, members) =
         SynModuleDecl.NestedModule(info.FromRcd, false, members, false, range.Zero)
+    static member CreateTypes (types: SynTypeDefnRcd list) =
+        SynModuleDecl.Types(types |> List.map (fun t -> t.FromRcd), range.Zero)
 
 type SynModuleOrNamespaceRcd with
     static member CreateModule id =
