@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog][Keep a Changelog] and this project adheres to [Semantic Versioning][Semantic Versioning].
 
 ## [Unreleased]
-- Added extensions for SynModuleDecl.CreateTypes, SynPat.CreateId, SynSinplePats.Create
+Added extensions for:
+- SynModuleDecl.CreateTypes
+- SynPat.CreateId
+- SynSinplePats.Create
+- SynExpr.CreateLambda, CreateComputationExpression, CreateMatchLambda, CreateLetOrUseBang, CreateYieldOrReturn, CreatePipeRight
+- SynMatchClause.Create
+- SynPAt.CrrateLongIdent, CreateNAaed, CreateParen, CreateWild, CreateConst, CreateTuple
 
 ---
 
