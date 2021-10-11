@@ -64,16 +64,6 @@ type SynPatRcd with
         SynPatRcd.Named { Pattern = pattern; Id = id; IsThis = false; Access = None; Range = range.Zero }
     static member CreateWild =
         SynPatRcd.Wild { Range = range.Zero }
-    static member CreateLongIdent(id, args: SynPatRcd list, ?access) =
-        SynPatRcd.LongIdent(
-            { SynPatLongIdentRcd.Create(
-                  id,
-                  args
-                  |> List.map (fun a -> a.FromRcd)
-                  |> SynArgPats.Pats
-              ) with
-                  Access = access }
-        )
 
 type QualifiedNameOfFile with
     static member Create name =
