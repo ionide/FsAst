@@ -7,6 +7,10 @@ open FSharp.Compiler.Text.Range
 open FSharp.Compiler.Text.Pos
 open FSharp.Compiler.XmlDoc
 
+module LongIdent =
+    let asString (li: LongIdent) =
+         li |> List.map (fun ident -> ident.idText) |> String.concat "."
+
 type Ident with
     static member Create text =
         Ident(text, range.Zero)
@@ -37,7 +41,15 @@ type SynArgPats with
     static member Empty =
         SynArgPats.Pats[]
 
+    static member CreatePats = SynArgPats.Pats
+
+    static member CreateNamed(idents: (Ident * SynPat) list) =
+        SynArgPats.NamePatPairs(idents, range0)
+        
+
 type SynPatRcd with
+    static member CreateNull =
+        SynPatRcd.Null { Range = range.Zero }
     static member CreateLongIdent (id, args: SynPatRcd list, ?access) =
         SynPatRcd.LongIdent ( {SynPatLongIdentRcd.Create(id, args |> List.map (fun a -> a.FromRcd) |> SynArgPats.Pats ) with Access = access } )
     static member CreateTuple patterns =
@@ -52,6 +64,16 @@ type SynPatRcd with
         SynPatRcd.Named { Pattern = pattern; Id = id; IsThis = false; Access = None; Range = range.Zero }
     static member CreateWild =
         SynPatRcd.Wild { Range = range.Zero }
+    static member CreateLongIdent(id, args: SynPatRcd list, ?access) =
+        SynPatRcd.LongIdent(
+            { SynPatLongIdentRcd.Create(
+                  id,
+                  args
+                  |> List.map (fun a -> a.FromRcd)
+                  |> SynArgPats.Pats
+              ) with
+                  Access = access }
+        )
 
 type QualifiedNameOfFile with
     static member Create name =
@@ -146,6 +168,29 @@ type SynExpr with
                 |> Some
                 |> inner tail
         inner exprs None
+    static member CreateLambda(fromMethod, inLambdaSeq, simplePats, body, parsedData) =
+        SynExpr.Lambda(fromMethod, inLambdaSeq, simplePats, body, parsedData, range0)
+    /// Creates: ` {...} `
+    static member CreateComputationExpression(expr) =
+        SynExpr.CompExpr(false, ref false, expr, range0)
+    /// Creates: `function a -> () | b -> ()`
+    static member CreateMatchLambda(clauses) =
+        SynExpr.MatchLambda(false, range0, clauses, DebugPointForBinding.NoDebugPointAtInvisibleBinding, range0)
+    /// Creates: `let! a = dothing()`        
+    static member CreateLetOrUseBang(isUse, isFromSrc, pat, rhs, andBangs, body) =
+        let andBangs = andBangs |> List.map (fun (a,b,c,d) -> DebugPointForBinding.DebugPointAtBinding(range0), a,b,c,d, range0)
+        SynExpr.LetOrUseBang(DebugPointForBinding.DebugPointAtBinding(range0), isUse, isFromSrc, pat, rhs, andBangs, body, range0)
+    ///Creates a list of let or use bindings along with an expr body `let! x = ...;and! y = ...`
+    static member CreateLetOrUseBang(letAndBangs, body) =
+        let exprs = letAndBangs |> List.map (fun (a,b,c,d) -> (DebugPointForBinding.DebugPointAtBinding(range0), a,b,c,d, range0))
+        let (debug, isUse, isFromSrc, pat, rhs, rng), others = match exprs with h :: t -> h, t
+        SynExpr.LetOrUseBang(debug, isUse, isFromSrc, pat, rhs, others, body, rng)
+    /// Creates a yield or return for a Computation expression or collection comprehension:  `yield item` / `return item`
+    static member CreateYieldOrReturn(isYield, isTrueReturn, expr) =    
+        SynExpr.YieldOrReturn( (isYield, isTrueReturn), expr, range.Zero)
+    /// Creasts a pipe right expression:  `lhs |> rhs`    
+    static member CreatePipeRight(lhs, rhs) =
+        SynExpr.CreateApp(SynExpr.CreateAppInfix(SynExpr.CreateIdentString "op_PipeRight", lhs), rhs)
 
 
 type SynType with
@@ -342,10 +387,6 @@ type SynArgInfo with
         SynArgInfo(SynAttributes.Empty, false, Some id)
     static member CreateIdString id =
         SynArgInfo.CreateId(Ident.Create id)
-
-type SynPatRcd with
-    static member CreateNull =
-        SynPatRcd.Null { Range = range.Zero }
 
 type SynValInfo with
     static member Empty =
@@ -736,3 +777,24 @@ type SynSimplePat with
 type SynSimplePats with
     static member Create(patterns) =
         SynSimplePats.SimplePats(patterns, range0)
+
+type SynMatchClause with
+    static member Create(pat: SynPat, whenExp: SynExpr option, resExpr: SynExpr) =
+        SynMatchClause.Clause(pat, whenExp, resExpr, range0, DebugPointForTarget.No)
+
+type SynPat with
+    static member CreateLongIdent(longDotId, extraId, typarDecls, argPats, ?access) =
+        SynPat.LongIdent(longDotId, extraId, typarDecls, argPats, access, range0)
+
+    static member CreateNamed(pat, ident, ?isSelf, ?access) =
+        SynPat.Named(pat, ident, defaultArg isSelf false, access, range0)
+
+    static member CreateParen(synPat) = SynPat.Paren(synPat, range0)
+
+    static member CreateWild = SynPat.Wild(range0)
+
+    static member CreateConst c = SynPat.Const(c, range0)
+    
+    static member CreateTuple(pats, ?isStruct) =
+        let isStruct = defaultArg isStruct false
+        SynPat.Tuple(isStruct, pats, range0)
