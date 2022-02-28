@@ -1,9 +1,10 @@
 source https://api.nuget.org/v3/index.json
 
 storage: none
-framework: netstandard2.0, netcoreapp3.1
+framework: netstandard2.0, net5.0
 
-nuget FSharp.Compiler.Service ~> 39
+nuget FSharp.Compiler.Service 41.0.1
+nuget FSharp.Core ~> 6
 nuget Fantomas
 
 nuget Microsoft.SourceLink.GitHub copy_local: true

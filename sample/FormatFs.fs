@@ -3,7 +3,7 @@ module FsAst.FormatFs
 
 open System.IO
 open Fantomas
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 
 let formatAst ast =
     let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true } // do not format comments
