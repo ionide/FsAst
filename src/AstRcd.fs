@@ -129,6 +129,7 @@ type SynPatRcd =
     | LongIdent of SynPatLongIdentRcd
     | Tuple of SynPatTupleRcd
     | Paren of SynPatParenRcd
+    | As of SynPatAsRcd
     | ArrayOrList of SynPatArrayOrListRcd
     | Null of SynPatNullRcd
     /// <summary>Creates an optional pattern '?pat' used for example to create optional parameters on static functions etc.</summary>
@@ -229,6 +230,11 @@ and SynPatParenRcd = {
     Pattern: SynPatRcd
     Range: range }
 
+and SynPatAsRcd = {
+    Left: SynPatRcd
+    Right: SynPatRcd
+    Range: range }
+
 and SynPatNullRcd = {
     Range: range }
 
@@ -243,6 +249,7 @@ type SynPatRcd  with
         | LongIdent u -> u.FromRcd
         | Tuple t -> t.FromRcd
         | Paren t -> t.FromRcd
+        | As n -> n.FromRcd
         | Null n -> n.FromRcd
         | OptionalVal n -> n.FromRcd
         | Or n -> n.FromRcd
@@ -271,6 +278,8 @@ and SynPatTupleRcd with
     member x.FromRcd = SynPat.Tuple(false, x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
 and SynPatParenRcd with
     member x.FromRcd = SynPat.Paren(x.Pattern.FromRcd, x.Range)
+and SynPatAsRcd with
+    member x.FromRcd = SynPat.As(x.Left.FromRcd, x.Right.FromRcd, x.Range)
 and SynPatNullRcd with
     member x.FromRcd = SynPat.Null(x.Range)
 and SynPatOptionalValRcd with
@@ -318,6 +327,8 @@ type SynPat with
             SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
         | SynPat.Paren(pattern, range) ->
             SynPatRcd.Paren { Pattern = pattern.ToRcd; Range = range }
+        | SynPat.As(left, right, range) ->
+            SynPatRcd.As { Left = left.ToRcd; Right = right.ToRcd; Range = range }
         | SynPat.ArrayOrList(isArray, elementPatterns, range) ->
             SynPatRcd.ArrayOrList {
                 IsArray = isArray
