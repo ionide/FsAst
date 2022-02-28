@@ -62,18 +62,19 @@ type SynComponentInfo with
 
 type SynTypeDefnRcd = {
     Info: SynComponentInfoRcd
+    EqualsRange: Range option
     Repr: SynTypeDefnRepr
     Members: SynMemberDefns
     ImplicitConstructor: SynMemberDefn option
     Range: range }
 with
     member x.FromRcd =
-        SynTypeDefn(x.Info.FromRcd, x.Repr, x.Members, x.ImplicitConstructor, x.Range)
+        SynTypeDefn(x.Info.FromRcd, x.EqualsRange, x.Repr, x.Members, x.ImplicitConstructor, x.Range)
 
 type SynTypeDefn with
     member x.ToRcd =
-        let (SynTypeDefn(info, repr, members, implicitConstructor, range)) = x
-        { Info = info.ToRcd; Repr = repr; Members = members; ImplicitConstructor = implicitConstructor; Range = range }
+        let (SynTypeDefn(info, equalsRange, repr, members, implicitConstructor, range)) = x
+        { Info = info.ToRcd; EqualsRange = equalsRange; Repr = repr; Members = members; ImplicitConstructor = implicitConstructor; Range = range }
 
 type SynTypeDefnReprObjectModelRcd = {
     Kind: SynTypeDefnKind
@@ -184,7 +185,7 @@ and SynPatIsInstanceRcd = {
     Range : range }
 
 and SynPatRecordRcd = {
-    Fields : ((LongIdent * Ident) * SynPatRcd) list
+    Fields : ((LongIdent * Ident)* Range * SynPatRcd) list
     Range : range
 }
 
@@ -216,6 +217,7 @@ and SynPatAttribRcd = {
 
 and SynPatLongIdentRcd = {
     Id: LongIdentWithDots
+    PropertyKeyword: PropertyKeyword option
     ExtraId : Ident option
     TyparDecls : SynValTyparDecls option
     Args: SynArgPats
@@ -273,7 +275,7 @@ and SynPatTypedRcd with
 and SynPatAttribRcd with
     member x.FromRcd = SynPat.Attrib(x.Pattern.FromRcd, x.Attributes, x.Range)
 and SynPatLongIdentRcd with
-    member x.FromRcd = SynPat.LongIdent(x.Id, x.ExtraId, x.TyparDecls, x.Args, x.Access, x.Range)
+    member x.FromRcd = SynPat.LongIdent(x.Id, x.PropertyKeyword, x.ExtraId, x.TyparDecls, x.Args, x.Access, x.Range)
 and SynPatTupleRcd with
     member x.FromRcd = SynPat.Tuple(false, x.Patterns |> List.map (fun p -> p.FromRcd), x.Range)
 and SynPatParenRcd with
@@ -294,7 +296,7 @@ and SynPatIsInstanceRcd with
     member x.FromRcd = SynPat.IsInst(x.Type, x.Range)
 and SynPatRecordRcd with
     member x.FromRcd =
-        let fields = [ for ((idents, ident), pattern) in x.Fields -> ((idents, ident), pattern.FromRcd) ]
+        let fields = [ for ((idents, ident), range, pattern) in x.Fields -> ((idents, ident), range, pattern.FromRcd) ]
         SynPat.Record(fields, x.Range)
 and SynPatQuoteExprRcd with
     member x.FromRcd = SynPat.QuoteExpr(x.Expr, x.Range)
@@ -321,8 +323,8 @@ type SynPat with
             SynPatRcd.Or { Left = left.ToRcd; Right = right.ToRcd; Range = range }
         | SynPat.Ands(patterns, range) ->
             SynPatRcd.Ands { Patterns = patterns |> List.map (fun pat -> pat.ToRcd); Range = range }
-        | SynPat.LongIdent(id, extraId, typarDecls , args, access, range) ->
-            SynPatRcd.LongIdent { Id = id; ExtraId = extraId; TyparDecls = typarDecls; Args = args; Access = access; Range = range }
+        | SynPat.LongIdent(id, propertyKeyword, extraId, typarDecls , args, access, range) ->
+            SynPatRcd.LongIdent { Id = id; PropertyKeyword = propertyKeyword; ExtraId = extraId; TyparDecls = typarDecls; Args = args; Access = access; Range = range }
         | SynPat.Tuple(_, patterns, range) ->
             SynPatRcd.Tuple { Patterns = patterns |> List.map (fun p -> p.ToRcd); Range = range }
         | SynPat.Paren(pattern, range) ->
@@ -338,8 +340,8 @@ type SynPat with
         | SynPat.Record(fields, range) ->
             SynPatRcd.Record {
                 Fields = [
-                    for ((idents, ident), pat) in fields ->
-                        ((idents, ident), pat.ToRcd)
+                    for ((idents, ident), range, pat) in fields ->
+                        ((idents, ident), range, pat.ToRcd)
                 ]
 
                 Range = range
@@ -406,17 +408,18 @@ type SynBindingRcd = {
     ValData: SynValData
     Pattern: SynPatRcd
     ReturnInfo: SynBindingReturnInfoRcd option
+    EqualsRange: Range option
     Expr: SynExpr
     Range: range
     Bind: DebugPointAtBinding }
 with
     member x.FromRcd =
-        SynBinding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.Expr, x.Range, x.Bind)
+        SynBinding(x.Access, x.Kind, x.IsInline, x.IsMutable, x.Attributes, x.XmlDoc, x.ValData, x.Pattern.FromRcd, x.ReturnInfo |> Option.map (fun ri -> ri.FromRcd), x.EqualsRange, x.Expr, x.Range, x.Bind)
 
 type SynBinding with
     member x.ToRcd =
-        let (SynBinding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, rhsExpr, mBind, spBind)) = x
-        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo |> Option.map (fun ri -> ri.ToRcd); Expr = rhsExpr; Range = mBind; Bind = spBind }
+        let (SynBinding(access, kind, isInline, isMutable, attrs, xmlDoc, info, pattern, returnInfo, equalsRange, rhsExpr, mBind, spBind)) = x
+        { Access = access; Kind = kind; IsInline = isInline; IsMutable = isMutable; Attributes = attrs; XmlDoc = xmlDoc; ValData = info; Pattern = pattern.ToRcd; ReturnInfo = returnInfo |> Option.map (fun ri -> ri.ToRcd); EqualsRange = equalsRange; Expr = rhsExpr; Range = mBind; Bind = spBind }
 
 [<RequireQualifiedAccess>]
 type SynTypeDefnSimpleReprRcd =
@@ -512,19 +515,20 @@ type SynTypeDefnSimpleRepr with
 type SynEnumCaseRcd = {
     Attributes: SynAttributes
     Id: Ident
+    EqualsRange: Range
     Constant: SynConst
     ValueRange: Range
     XmlDoc: PreXmlDoc
     Range: range }
 with
     member x.FromRcd =
-        SynEnumCase(x.Attributes, x.Id, x.Constant, x.ValueRange, x.XmlDoc, x.Range)
+        SynEnumCase(x.Attributes, x.Id, x.EqualsRange, x.Constant, x.ValueRange, x.XmlDoc, x.Range)
 
 type SynEnumCase with
     member x.ToRcd =
         match x with
-        | SynEnumCase(attributes, id, constant, valueRange, xmlDoc, range) ->
-            { Attributes = attributes; Id = id; Constant = constant; ValueRange = valueRange; XmlDoc = xmlDoc; Range = range }
+        | SynEnumCase(attributes, id, equalsRange, constant, valueRange, xmlDoc, range) ->
+            { Attributes = attributes; Id = id; EqualsRange = equalsRange; Constant = constant; ValueRange = valueRange; XmlDoc = xmlDoc; Range = range }
 
 type XmlDoc with
     member x.Lines =
