@@ -14,7 +14,7 @@ FsAst is part of Ionide tooling suite - You can support its development on [Open
 ## Useful links
 
 * Original blog post about the project by [@ctaggart](https://github.com/ctaggart) - http://blog.ctaggart.com/2014/09/generating-f-code-using-its-ast.html
-* Applied Meta-Programming with Myriad and Falanax by [@7sharp9](https://github.com/7sharp9)  - https://7sharp9.dev/2019/04/24/2019-04-24-applied-metaprogramming-with-myriad/
+* Applied Meta-Programming with Myriad and Falanax by [@7sharp9](https://github.com/7sharp9)  - https://7sharp9.dev/2019/04/24/2019-04-24-applied-metaprogramming-with-myriad/  **(Although Myriad no longer uses FsAst)**
 * Sample for printing out generated code with Fantomas - https://github.com/ionide/FsAst/tree/master/sample
 
 ## Build process
