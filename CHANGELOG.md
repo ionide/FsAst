@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 ---
 
 ## [Released]
+
+## [0.11.0] - 2022-03-04
+
+- Updated to FCS 41
+- Add CreateType to SynModuleDecl
+- Add optional access to CreateLongIdent
+- Add CreateId to SynSimplePat and Add Create to SynSimplePats
+
 ## [0.10.0] - 2021-07-27
 ### Changed
 - Updated to FCS 39
