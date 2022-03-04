@@ -44,7 +44,7 @@ let rec printExpr indent expr =
 
 let rec printPattern indent pat =
     match pat with
-    | SynPat.LongIdent(id, id2, decls, cnstrArgs, access, _) ->
+    | SynPat.LongIdent(id, propertyKeyword, id2, decls, cnstrArgs, access, _) ->
         printfn "%*sPat LongIdent: %s" indent "" id.AsString
 //        printfn "%*s  decls: %A" indent "" decls
         match cnstrArgs with
@@ -54,7 +54,7 @@ let rec printPattern indent pat =
                 printPattern (indent+4) p
         | SynArgPats.NamePatPairs (namedPats, _) ->
             printfn "%*s  cnstrArgs, %d namedPats" indent "" namedPats.Length
-            for id, p in namedPats do
+            for id, range, p in namedPats do
                 printfn "%*s  id: %s" indent "" id.idText
                 printPattern (indent+4) p
     | SynPat.Tuple (_,pats, _) ->

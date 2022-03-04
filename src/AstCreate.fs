@@ -30,8 +30,8 @@ type LongIdentWithDots with
         sb.ToString()
 
 type SynPatLongIdentRcd with
-    static member Create (id, args, ?extraId, ?typarDecls, ?access) =
-        { Id = id; ExtraId = extraId; TyparDecls = typarDecls ; Args = args; Access = access; Range = range0 }
+    static member Create (id, args, ?propertyKeyword, ?extraId, ?typarDecls, ?access) =
+        { Id = id; PropertyKeyword = propertyKeyword; ExtraId = extraId; TyparDecls = typarDecls ; Args = args; Access = access; Range = range0 }
 
 type SynArgPats with
     static member Empty =
@@ -99,9 +99,12 @@ type SynExpr with
     static member CreateNull =
         SynExpr.Null(range0)
     static member CreateRecord (fields: list<RecordFieldName * option<SynExpr>>) =
-        let fields = fields |> List.map (fun (rfn, synExpr) -> (rfn, synExpr, None))
+        let fields = fields |> List.map (fun (rfn, synExpr) -> SynExprRecordField (rfn, None, synExpr, None))
         SynExpr.Record(None, None, fields, range0)
     static member CreateRecordUpdate (copyInfo: SynExpr, fieldUpdates) =
+        let fields = fieldUpdates |> List.map (fun (rfn, synExpr) -> SynExprRecordField(rfn, None, synExpr, None))
+        SynExpr.Record(None, None, fields, range0)
+    static member CreateRecordUpdate (copyInfo: SynExpr, fieldUpdates ) =
         let blockSep = (range0, None) : BlockSeparator
         let copyInfo = Some (copyInfo, blockSep)
         SynExpr.Record (None, copyInfo, fieldUpdates, range0)
@@ -115,7 +118,7 @@ type SynExpr with
     /// | clauseN
     /// ```
     static member CreateMatch(matchExpr, clauses) =
-        SynExpr.Match(DebugPointAtBinding.Yes range0, matchExpr, clauses, range0)
+        SynExpr.Match(range0, DebugPointAtBinding.Yes range0, matchExpr, range0, clauses, range0)
     /// Creates : `instanceAndMethod(args)`
     static member CreateInstanceMethodCall(instanceAndMethod : LongIdentWithDots, args) =
         let valueExpr = SynExpr.CreateLongIdent instanceAndMethod
@@ -367,6 +370,7 @@ type SynBindingRcd with
             ValData = SynValData(Some SynMemberFlags.InstanceMember, SynValInfo.Empty, None)
             Pattern = SynPatRcd.CreateNull
             ReturnInfo = None
+            EqualsRange = None
             Expr = SynExpr.Null range0
             Range = range0
             Bind = DebugPointAtBinding.NoneAtInvisible
@@ -436,7 +440,7 @@ type SynMemberDefn with
         SynMemberDefn.Member(overrideBinding.FromRcd, range0)
 
     static member CreateInterface(interfaceType, members) =
-        SynMemberDefn.Interface(interfaceType, members, range0)
+        SynMemberDefn.Interface(interfaceType, None, members, range0)
 
 type SynTypeDefnReprObjectModelRcd with
     static member Create members =
@@ -449,6 +453,7 @@ type SynTypeDefnReprObjectModelRcd with
 type SynTypeDefnRcd with
     static member Create (info: SynComponentInfoRcd, members) =
         {   Info = info
+            EqualsRange = None
             Repr = SynTypeDefnReprObjectModelRcd.Create(members).FromRcd
             Members = []
             ImplicitConstructor = None
@@ -456,6 +461,7 @@ type SynTypeDefnRcd with
         }
     static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr, ?members) =
         {   Info = info
+            EqualsRange = None
             Repr =  SynTypeDefnRepr.Simple(simple, range0)
             Members = Option.defaultValue [] members
             ImplicitConstructor = None
@@ -484,7 +490,7 @@ type SynModuleDecl with
     static member CreateAttributes(attributes) =
         SynModuleDecl.Attributes(attributes, range0)
     static member CreateNestedModule(info : SynComponentInfoRcd, members) =
-        SynModuleDecl.NestedModule(info.FromRcd, false,members, false, range0)
+        SynModuleDecl.NestedModule(info.FromRcd, false, None, members, false, range0)
     static member CreateTypes (types: SynTypeDefnRcd list) =
         SynModuleDecl.Types(types |> List.map (fun t -> t.FromRcd), range0)
 
@@ -570,6 +576,7 @@ type SynEnumCaseRcd with
     static member Create (id, cnst) =
         {   Attributes = SynAttributes.Empty
             Id = id
+            EqualsRange = Range.Zero
             Constant = cnst
             ValueRange = Range.Zero
             XmlDoc = PreXmlDoc.Empty
