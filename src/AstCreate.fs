@@ -6,6 +6,7 @@ open FSharp.Compiler.Text
 open FSharp.Compiler.Text.Range
 open FSharp.Compiler.Text.Position
 open FSharp.Compiler.Xml
+open FSharp.Compiler.SyntaxTrivia
 
 type Ident with
     static member Create text =
@@ -59,7 +60,7 @@ type QualifiedNameOfFile with
 
 type SynMemberFlags with
     static member InstanceMember : SynMemberFlags =
-        { IsInstance = true; MemberKind = SynMemberKind.Member; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false }
+        { IsInstance = true; MemberKind = SynMemberKind.Member; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; Trivia = SynMemberFlagsTrivia.Zero }
     static member StaticMember =
         { SynMemberFlags.InstanceMember with IsInstance = false }
 
@@ -370,7 +371,6 @@ type SynBindingRcd with
             ValData = SynValData(Some SynMemberFlags.InstanceMember, SynValInfo.Empty, None)
             Pattern = SynPatRcd.CreateNull
             ReturnInfo = None
-            EqualsRange = None
             Expr = SynExpr.Null range0
             Range = range0
             Bind = DebugPointAtBinding.NoneAtInvisible
@@ -419,6 +419,7 @@ type SynMemberDefn with
             IsDispatchSlot = false;
             IsFinal = false
             MemberKind = SynMemberKind.Member
+            Trivia = SynMemberFlagsTrivia.Zero
         }
         let staticBinding = { binding with ValData = SynValData.SynValData(staticMemberFlags, valInfo, identifier) }
         SynMemberDefn.Member(staticBinding.FromRcd, range0)
@@ -435,6 +436,7 @@ type SynMemberDefn with
             IsDispatchSlot = false;
             IsFinal = false
             MemberKind = SynMemberKind.Member
+            Trivia = SynMemberFlagsTrivia.Zero
         }
         let overrideBinding = { binding with ValData = SynValData.SynValData(overrideMemberFlags, valInfo, identifier) }
         SynMemberDefn.Member(overrideBinding.FromRcd, range0)
@@ -453,7 +455,6 @@ type SynTypeDefnReprObjectModelRcd with
 type SynTypeDefnRcd with
     static member Create (info: SynComponentInfoRcd, members) =
         {   Info = info
-            EqualsRange = None
             Repr = SynTypeDefnReprObjectModelRcd.Create(members).FromRcd
             Members = []
             ImplicitConstructor = None
@@ -461,7 +462,6 @@ type SynTypeDefnRcd with
         }
     static member CreateSimple (info: SynComponentInfoRcd, simple: SynTypeDefnSimpleRepr, ?members) =
         {   Info = info
-            EqualsRange = None
             Repr =  SynTypeDefnRepr.Simple(simple, range0)
             Members = Option.defaultValue [] members
             ImplicitConstructor = None
@@ -490,7 +490,7 @@ type SynModuleDecl with
     static member CreateAttributes(attributes) =
         SynModuleDecl.Attributes(attributes, range0)
     static member CreateNestedModule(info : SynComponentInfoRcd, members) =
-        SynModuleDecl.NestedModule(info.FromRcd, false, None, members, false, range0)
+        SynModuleDecl.NestedModule(info.FromRcd, false, members, false, range0, SynModuleDeclNestedModuleTrivia.Zero)
     static member CreateTypes (types: SynTypeDefnRcd list) =
         SynModuleDecl.Types(types |> List.map (fun t -> t.FromRcd), range0)
 
@@ -576,7 +576,6 @@ type SynEnumCaseRcd with
     static member Create (id, cnst) =
         {   Attributes = SynAttributes.Empty
             Id = id
-            EqualsRange = Range.Zero
             Constant = cnst
             ValueRange = Range.Zero
             XmlDoc = PreXmlDoc.Empty

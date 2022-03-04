@@ -3,7 +3,7 @@ source https://api.nuget.org/v3/index.json
 storage: none
 framework: netstandard2.0, net5.0
 
-nuget FSharp.Compiler.Service 41.0.2
+nuget FSharp.Compiler.Service 41.0.3
 nuget FSharp.Core ~> 6
 nuget Fantomas
 
