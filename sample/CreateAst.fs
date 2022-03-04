@@ -3,10 +3,9 @@ module FsAst.CreateAst
 
 open System
 open Fantomas
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
-open Microsoft.FSharp.Quotations
-open FSharp.Compiler.XmlDoc
+open FSharp.Compiler.Xml
 
 let createBasicClass() =
     async {
@@ -115,7 +114,7 @@ let createBasicPInvoke() =
             |> List.map (fun (typ, name) ->
                 SynPatRcd.CreateAttrib(
                     SynPatRcd.CreateTyped(
-                        SynPatRcd.CreateNamed(Ident.Create name, SynPatRcd.CreateWild),
+                        SynPatRcd.CreateNamed(Ident.Create name),
                         SynType.NativePointer(typ)
                     ),
                     []

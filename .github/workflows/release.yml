@@ -1,16 +1,17 @@
-name: Release
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
+name: Release
 
 on:
   push:
-    tags: 
+    tags:
     - '*'
 
 jobs:
   release:
     strategy:
       matrix:
-        dotnet: [5.0.100]
+        dotnet: [6.0.200]
 
     runs-on: ubuntu-20.04
 
@@ -36,7 +37,7 @@ jobs:
     - name: Restore tools
       run: dotnet tool restore
     - name: Run build
-      run: dotnet build -c Release /p:Version=${{ steps.tag_name.outputs.current_version }} 
+      run: dotnet build -c Release /p:Version=${{ steps.tag_name.outputs.current_version }}
     - name: Create package
       run: dotnet pack -c Release /p:Version=${{ steps.tag_name.outputs.current_version }} /p:PackageReleaseNotes="${{ steps.changelog_reader.outputs.changes }}" -o ./bin
     - name: Create Release
@@ -53,7 +54,7 @@ jobs:
         files: |
           ./bin/FsAst.*.nupkg
     - name: Publish package to nuget
-      env: 
+      env:
         NUGET_KEY: ${{ secrets.NUGET_KEY }}
       run: dotnet nuget push ./bin/FsAst.*.nupkg --api-key $NUGET_KEY --source https://api.nuget.org/v3/index.json
 

@@ -3,8 +3,8 @@ module FsAst.PrintAstInfo
 
 open System.IO
 open Fantomas
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.CodeAnalysis
 
 let rec printType indent typ =
     match typ with
@@ -19,10 +19,10 @@ let rec printType indent typ =
 
 let rec printExpr indent expr =
     match expr with
-    | SynExpr.Const(c,_) ->
+    | SynExpr.Const(c, _) ->
         match c with
         | SynConst.Int32 i -> printfn "%*sConst Int32: %d" indent "" i
-        | SynConst.String (s,_) -> printfn "%*sConst String: %s" indent "" s
+        | SynConst.String (s, _, _) -> printfn "%*sConst String: %s" indent "" s
         | cnst -> printfn "%*scnst not matched: %A" indent "" cnst
     | SynExpr.Paren(innerExpr, _, _, _) ->
         printfn "%*sParen expr" indent ""
@@ -68,9 +68,8 @@ let rec printPattern indent pat =
         printfn "%*sPat Typed" indent ""
         printType (indent+2) typ
         printPattern (indent+2) p
-    | SynPat.Named(p, id, _, _, _) ->
+    | SynPat.Named(id, _, _, _) ->
         printfn "%*sPat Named %s" indent "" id.idText
-        printPattern (indent+2) p
     | SynPat.Wild _ ->
         printfn "%*sPat Wild" indent ""
     | pat -> printfn "%*sPat not matched: %A" indent "" pat
@@ -114,7 +113,7 @@ let printAstInfo filename checker =
                         | SynTypeDefnSimpleReprRcd.Record record ->
                             for field in record.Fields do
                                 match field with
-                                | SynField.Field(attribs, isstatic, ident, typ, e, prexmldoc, access, range) ->
+                                | SynField(attribs, isstatic, ident, typ, e, prexmldoc, access, range) ->
                                     printfn "%s:"
                                         (match ident with
                                         | Some i -> i.idText

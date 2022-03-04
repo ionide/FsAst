@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{848F6F9C-5DB5-4422-B90E-2ECCDE5E7582}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,14 +12,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		global.json = global.json
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 		readme.md = readme.md
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "sample", "sample\sample.fsproj", "{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "sample", "sample\sample.fsproj", "{49F5DB94-0965-4F2D-AE49-C5573D34BCB0}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsAst", "src\FsAst.fsproj", "{057534D9-199F-4231-84C8-AE658D10B834}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsAst", "src\FsAst.fsproj", "{057534D9-199F-4231-84C8-AE658D10B834}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", "{7D066774-85DA-455B-BEE5-B391FB14C03D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,5 +45,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54E7FF0A-C855-41BF-8288-79FAEACA8446}
 	EndGlobalSection
 EndGlobal
