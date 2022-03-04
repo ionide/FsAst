@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [0.12.0] - 2022-03-04
+
+- Updated to FCS 41.0.2 (thanks @xperiandri!)
+
 ## [0.11.0] - 2022-03-04
 
 - Updated to FCS 41
